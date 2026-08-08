@@ -12,7 +12,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%236ee7c0'/%3E%3Ctext x='16' y='23' font-family='system-ui,sans-serif' font-size='20' font-weight='700' text-anchor='middle' fill='%2308201a'%3ED%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..700&family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
 <style>
 /* =============================================================
    Deception Decoder — visual system
@@ -299,6 +299,59 @@ footer.foot .disclaimer { color: var(--paper-faint); font-size: 12.5px; }
   .verdict, .annotated, .finding { border-color: #bbb; background: #fff; color: #111; }
   .annotated mark { background: none !important; border-bottom: 2px solid #666; }
 }
+
+/* =============================================================
+   PAPER RE-THEME — the Decoder joins the foundry system.
+   Token override only: the component layer above stays untouched,
+   which is the point of having tokens. Severity hues re-picked
+   for AA contrast on bone.
+   ============================================================= */
+:root {
+  --ink:        #f3f0e8;   /* page ground (was near-black) */
+  --ink-2:      #faf8f2;   /* panels */
+  --ink-3:      #ebe6d9;   /* insets */
+  --line:       #d5cdba;
+  --line-soft:  #e2dccc;
+  --paper:      #191611;   /* primary text (was bone) */
+  --paper-dim:  #4a443a;
+  --paper-faint:#8a8377;
+
+  --accent:     #d63d1e;   /* vermilion replaces teal */
+  --accent-ink: #ffffff;
+  --sev-1:      #3d6ca8;
+  --sev-2:      #9a6a0a;
+  --sev-3:      #bb2c10;
+  --safe:       #7c5a10;
+
+  --serif: "Fraunces", "Newsreader", Georgia, serif;
+}
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(214,61,30,.04) 0%, transparent 60%),
+    var(--ink);
+}
+.mark { background: var(--accent); color: #fff; }
+.masthead .tag::before { background: var(--accent); }
+.hero .privacy { color: var(--accent); background: rgba(214,61,30,.07); border-color: rgba(214,61,30,.3); }
+textarea#input { background: var(--ink-2); box-shadow: inset 0 1px 3px rgba(25,22,17,.06); }
+textarea#input:focus { box-shadow: 0 0 0 4px rgba(214,61,30,.12); }
+button.primary:hover { background: #e5502f; box-shadow: 0 6px 22px rgba(214,61,30,.25); }
+.verdict { background: var(--ink-2); }
+.verdict[data-band="clear"] { --band: #2e7d5b; }
+.indices .fill { background: linear-gradient(90deg, var(--sev-1), var(--sev-2) 60%, var(--sev-3)); }
+.annotated mark[data-sev="1"] { background: rgba(61,108,168,.12); }
+.annotated mark[data-sev="2"] { background: rgba(154,106,10,.12); }
+.annotated mark[data-sev="3"] { background: rgba(187,44,16,.10); }
+.safety { border-color: rgba(124,90,16,.45); background: rgba(154,106,10,.07); }
+.safety p, .safety ul { color: #55431a; }
+.safety h3, .safety a { color: #7c5a10; }
+.drawer { background: var(--ink-2); box-shadow: -30px 0 80px rgba(25,22,17,.18); }
+.drawer .note, .script { background: var(--ink-3); }
+.drawer p { color: var(--paper-dim); }
+.script .s, .script { color: var(--paper); }
+.scrim { background: rgba(25, 22, 17, 0.35); }
+.finding { background: var(--ink-2); }
+footer.foot a { color: var(--paper-dim); }
 
 </style>
 <link rel="stylesheet" href="../assets/css/site.css">

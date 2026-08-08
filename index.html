@@ -3,176 +3,617 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>THE BULLSHIT DECODER — instruments for seeing clearly</title>
-<meta name="description" content="Three instruments for naming manipulation: a pattern decoder that analyses any message, a forensic reconstruction environment, and an argument-autopsy console. Everything runs in your browser.">
-<meta name="color-scheme" content="dark">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%236ee7c0'/%3E%3Ctext x='16' y='23' font-family='system-ui,sans-serif' font-size='20' font-weight='700' text-anchor='middle' fill='%2308201a'%3ED%3C/text%3E%3C/svg%3E">
+<title>THE BULLSHIT DECODER — language is evidence</title>
+<meta name="description" content="A walk through three instruments for naming manipulation: a live decoder, a hall of audio evidence, and an argument-autopsy console. Everything runs in your browser; nothing is uploaded.">
+<meta name="color-scheme" content="light">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f3f0e8'/%3E%3Ctext x='16' y='24' font-family='Georgia,serif' font-size='22' font-weight='700' text-anchor='middle' fill='%23d63d1e'%3EB%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,200;0,6..72,300;1,6..72,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
-<body class="landing">
+<body class="foundry">
 
-<canvas id="field" aria-hidden="true"></canvas>
+<canvas id="ink" aria-hidden="true"></canvas>
+<div id="hallbg" aria-hidden="true"></div>
+<div id="focusring" aria-hidden="true"></div>
+
+<div class="hud" id="hud" aria-hidden="true">
+  <div class="tl"><span class="kick"></span>A LIVING CASE FILE</div>
+  <div class="tr"><span class="cap">State</span><span class="val" id="hud-state">CASTING</span></div>
+  <div class="bl"><span class="cap">Room</span><span class="val" id="hud-room">01 — 05</span></div>
+  <div class="br"><span class="cap">Library</span><span class="val" id="hud-lib">— CLASSES · — SIGNATURES</span></div>
+</div>
 
 <nav class="sitenav">
-  <a class="brand" href="/">THE BULLSHIT DECODER</a>
+  <a class="brand" href="./">THE BULLSHIT DECODER</a>
   <div class="navlinks">
     <a href="decoder/">Decoder</a>
     <a href="oblivion/">O.B.L.I.V.I.O.N.</a>
     <a href="gaslight/">Gaslight Protocols</a>
   </div>
-  <span class="navtag">runs entirely in your browser</span>
+  <span class="navtag">local analysis · nothing uploaded</span>
 </nav>
 
-<main>
-  <section class="hero">
-    <p class="eyebrow">Three instruments · one method</p>
-    <h1>Language is where it<br>starts. <em>Start there too.</em></h1>
-    <p class="lede">
-      Coercion rarely arrives announced. It arrives as a reasonable sentence — a joke, a worry, a favour,
-      a question about where you were. These are instruments for reading that sentence closely enough to
-      name what it is doing.
-    </p>
-    <p class="lede sub">
-      Nothing you type is uploaded, stored, or logged. There is no account, no analytics, and no server —
-      the analysis happens on your device, and you can verify that in your browser's network tab.
-    </p>
-    <a class="enter" href="decoder/">Open the Decoder <span aria-hidden="true">→</span></a>
-  </section>
+<main class="walk" id="walk">
 
-  <section class="doors">
-    <a class="door d1" href="decoder/">
-      <span class="idx">01</span>
-      <h2>The <b>Decoder</b></h2>
-      <p class="what">Paste any message. It returns the documented patterns inside it — highlighted phrase by
-        phrase, each with its clinical mechanism, its source in the literature, and three non-reactive replies.</p>
-      <ul class="specs">
-        <li><b id="n-classes">33</b> tactic classes</li>
-        <li><b id="n-sigs">169</b> signatures</li>
-        <li><b id="n-fams">7</b> pressure indices</li>
-      </ul>
-      <span class="go">Analyse a message →</span>
-    </a>
-
-    <a class="door d2" href="oblivion/">
-      <span class="idx">02</span>
-      <h2>O.B.L.I.V.I.O.N.</h2>
-      <p class="what">A forensic reconstruction environment. Rebuild a scene from the outside in — environment,
-        subjects, audio evidence, field briefings — and watch a mechanism become legible as a structure rather
-        than a feeling.</p>
-      <ul class="specs">
-        <li>Scene reconstruction</li>
-        <li>Evidence archive</li>
-        <li>Analysis modules</li>
-      </ul>
-      <span class="go">Enter the environment →</span>
-    </a>
-
-    <a class="door d3" href="gaslight/">
-      <span class="idx">03</span>
-      <h2>The <b>Gaslight Protocols</b></h2>
-      <p class="what">An argument autopsy. Feed in the excuse; get back the fallacy, the translation, and a
-        flat clinical narration of exactly what the sentence was built to do.</p>
-      <ul class="specs">
-        <li>Logic scanner</li>
-        <li>Narration engine</li>
-        <li>Episode pipeline</li>
-      </ul>
-      <span class="go">Run an autopsy →</span>
-    </a>
-  </section>
-
-  <section class="method">
-    <h3>How to read anything here</h3>
-    <div class="cols">
+  <!-- ROOM 01 · THE FOUNDRY -->
+  <section class="room hero" data-scene="glyph" data-state="CASTING">
+    <span class="idx">01</span>
+    <div class="hero-grid">
       <div>
-        <h4>It describes text, not people</h4>
-        <p>No output concludes that anyone is an abuser. A flagged phrase is a pattern that appears in the
-          words, nothing more. Intent lives in a person; these tools only ever see a sentence.</p>
+        <p class="kicker reveal">A forensic foundry — <em>language, set in ink</em></p>
+        <h1 class="display reveal">Language is<br><span class="verm">evidence.</span></h1>
+        <p class="lede reveal">
+          Several thousand grains of ink, sampled from the letter's own outline. They settle into a
+          glyph, and yield when you move across them — carve a hollow, lift your hand, and it heals.
+          Every sentence ever said to you is built from the same material. This site reads the grain.
+        </p>
+        <div class="castrow reveal" id="castrow" role="group" aria-label="Choose the specimen glyph"></div>
+        <p class="hint reveal" style="margin-top:20px">move over the letterform to carve it · click a cast to recast</p>
       </div>
-      <div>
-        <h4>Mitigating evidence counts</h4>
-        <p>Apologies, concessions, and hedging genuinely lower the reading. An instrument that can only
-          escalate isn't an instrument — it's a mirror for whatever you brought to it.</p>
-      </div>
-      <div>
-        <h4>A clear result is not absolution</h4>
-        <p>Harm travels in ways no text analyser catches: tone, history, timing, the thing left unsaid.
-          If something felt wrong and nothing here flags it, your read still counts as data.</p>
-      </div>
-      <div>
-        <h4>Every claim shows its source</h4>
-        <p>Each pattern carries its lineage — Freyd on DARVO, Stark on coercive control, Sweet on
-          gaslighting, Bancroft on entitlement — shown to you verbatim, so you can check the work.</p>
+      <div class="hero-glyphside" id="glyphside">
+        <span class="glyph-meta a">State<span class="big" id="glyph-state">CAST</span></span>
+        <span class="glyph-meta b">Specimen · 144pt · Black<span class="big">Aa — 01</span></span>
       </div>
     </div>
+  </section>
+
+  <!-- ROOM 02 · THE SPECIMEN -->
+  <section class="room" data-scene="frame" data-state="DECODING">
+    <span class="idx">02</span>
+    <p class="kicker reveal">The living specimen — <em>watch it work</em></p>
+    <h2 class="display reveal">The sentence,<br>under glass.</h2>
+    <p class="lede reveal">A real message, decoded by the real engine, in front of you. The underlines are
+      not decoration — select one and the mechanism opens.</p>
+    <div class="plate reveal" style="margin-top:36px">
+      <span class="plate-cap">Specimen · live decode · runs on your device</span>
+      <p class="specimen-text" id="specimen" aria-live="polite"></p>
+      <div class="specimen-foot">
+        <button class="recast" id="recast">↻ Recast specimen</button>
+        <div class="readbar" id="readbar"></div>
+      </div>
+    </div>
+    <p class="hint reveal" style="margin-top:18px">then bring your own: the full instrument is one door away</p>
+    <div class="popcard" id="popcard" hidden role="dialog" aria-label="Pattern detail"></div>
+  </section>
+
+  <!-- ROOM 03 · THE HALL OF DUST -->
+  <section class="room hall" data-scene="dust" data-state="IN THE HALL">
+    <span class="idx">03</span>
+    <div class="hall-grid">
+      <div class="hall-stage" id="hallstage">
+        <span class="focus-hint">press and hold to focus the exhibit</span>
+      </div>
+      <div>
+        <div class="plaque reveal">
+          <span class="ex-no">Exhibit I</span>
+          <h3>The Quotation</h3>
+          <div class="ex-caps">Residue · of things said<br>Speaker unknown · date disputed<br>Meaning — undetermined</div>
+          <hr>
+          <p>The most contested artifact in any relationship is the sentence itself: what was said,
+             in which tone, and whether it happened at all. This mark is assembled from dust because
+             that is how quotations survive — in particles, re-arranged by every retelling.</p>
+          <p>Hold it in focus and it sharpens. Let go, and it drifts — exactly like memory under
+             pressure. The instruments in the next room exist so you don't have to hold it alone.</p>
+          <span class="ex-foot">Anatomical point-sampling · <span id="dustcount">—</span> grains</span>
+        </div>
+        <div class="plate reveal" style="margin-top:22px">
+          <span class="plate-cap">Exhibit II · recovered audio · rendered locally</span>
+          <div class="wavewrap">
+            <canvas class="inkwave" id="inkwave" aria-label="Audio evidence waveform. Click to seek."></canvas>
+          </div>
+          <div class="wavecap">
+            <button class="playink" id="playwave">▶ Play evidence</button>
+            <span class="wavemeta" id="wavemeta">SYNTHESIZED IN-BROWSER · NO RECORDING EXISTS · NOTHING UPLOADED</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROOM 04 · THE CHAMBERS -->
+  <section class="room" data-scene="scatter" data-state="CHOOSING">
+    <span class="idx">04</span>
+    <p class="kicker reveal">Three chambers — <em>one method</em></p>
+    <h2 class="display reveal">Choose your<br>instrument.</h2>
+    <div class="doorrow">
+      <a class="doorplate reveal" href="decoder/" data-door>
+        <span class="dp-no">CHAMBER 01</span>
+        <h3>The <em>Decoder</em></h3>
+        <p>Paste any message. Every documented pattern inside it is underlined, named, sourced, and
+           answered with three non-reactive replies. Files and transcripts welcome.</p>
+        <span class="dp-specs"><span id="n-classes">— classes</span><span id="n-sigs">— signatures</span><span id="n-fams">— indices</span></span>
+        <span class="dp-go">Analyse a message</span>
+      </a>
+      <a class="doorplate dark reveal" href="oblivion/" data-door>
+        <span class="dp-no">CHAMBER 02</span>
+        <h3>O.B.L.I.V.I.O.N.</h3>
+        <p>The dark room. Reconstruct a scene from evidence — audio, video, images, transcripts —
+           with players, briefings, and the same analyzer behind every module.</p>
+        <span class="dp-specs"><span>evidence archive</span><span>scene renders</span><span>analysis modules</span></span>
+        <span class="dp-go">Enter the environment</span>
+      </a>
+      <a class="doorplate reveal" href="gaslight/" data-door>
+        <span class="dp-no">CHAMBER 03</span>
+        <h3>The <em>Gaslight Protocols</em></h3>
+        <p>An argument autopsy. Feed in the excuse; receive the fallacy, the plain-English
+           translation, and a flat clinical narration of what the sentence was built to do.</p>
+        <span class="dp-specs"><span>logic scanner</span><span>narration engine</span><span>episode pipeline</span></span>
+        <span class="dp-go">Run an autopsy</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ROOM 05 · THE METHOD -->
+  <section class="room" data-scene="margin" data-state="COLOPHON" style="min-height:70vh">
+    <span class="idx">05</span>
+    <p class="kicker reveal">How to read anything here</p>
+    <div class="method-cols">
+      <div class="reveal"><h4>It describes text, not people</h4><p>No output concludes that anyone is an abuser. A flagged phrase is a pattern in words. Intent lives in a person; these instruments only ever see a sentence.</p></div>
+      <div class="reveal"><h4>Mitigating evidence counts</h4><p>Apologies, concessions, and hedging genuinely lower the reading. An instrument that can only escalate isn't an instrument — it's a mirror.</p></div>
+      <div class="reveal"><h4>A clear result is not absolution</h4><p>Harm travels in tone, history, and timing — places no text analyser reaches. If it felt wrong and nothing flags, your read still counts as data.</p></div>
+      <div class="reveal"><h4>Every claim shows its source</h4><p>Each pattern carries its lineage — Freyd, Stark, Sweet, Bancroft, Gottman — printed verbatim, so you can check the work.</p></div>
+    </div>
+    <hr class="rule">
   </section>
 </main>
 
 <footer class="sitefoot">
-  <p>An educational instrument. Not a diagnosis, not a psychological assessment, not evidence about any
-     person's character or intent.</p>
+  <p>An educational instrument. Not a diagnosis, not a psychological assessment, not evidence about any person's character or intent.</p>
   <p>In danger? US: 1-800-799-7233 (DV) or 988 (crisis) · UK: 0808 2000 247 · AU: 1800 737 732 ·
      <a href="https://www.befrienders.org" target="_blank" rel="noopener noreferrer">international helplines</a>.</p>
   <p class="colophon">No accounts · no cookies · no analytics · open source · built with Claude Code</p>
 </footer>
 
+<div class="walk-live" aria-live="polite" id="walklive"></div>
+
 <script src="assets/engine.bundle.js"></script>
 <script>
-/* Library counters are read from the engine itself, so the landing page can
-   never advertise a number the analyzer doesn't actually have. */
+/* ============================================================
+   THE WALK — foundry → specimen → hall of dust → chambers
+   One continuous ink-grain system carries the visitor through.
+   Zero dependencies. Transform/opacity-only page motion; canvas
+   work batched into alpha buckets (see the Triptych perf study).
+   ============================================================ */
 (function () {
-  if (typeof DecoderEngine === "undefined") return;
-  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  set("n-classes", DecoderEngine.TAXONOMY.length);
-  set("n-sigs", DecoderEngine.TAXONOMY.reduce((n, t) => n + t.patterns.length, 0));
-  set("n-fams", Object.keys(DecoderEngine.FAMILIES).length);
-})();
+  "use strict";
+  const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = s => document.querySelector(s);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
-/* Ambient field: slow drifting points joined by faint lines — a lattice that
-   keeps reorganizing itself. Cheap (60 points, capped DPR) and fully disabled
-   under prefers-reduced-motion. */
-(function () {
-  const c = document.getElementById("field");
-  if (!c || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const x = c.getContext("2d");
-  let W, H, DPR, pts = [];
-  function size() {
-    DPR = Math.min(devicePixelRatio || 1, 2);
-    W = c.width = innerWidth * DPR; H = c.height = innerHeight * DPR;
-    c.style.width = "100%"; c.style.height = "100%";
-    const n = innerWidth < 700 ? 32 : 60;
-    pts = Array.from({ length: n }, () => ({
-      x: Math.random() * W, y: Math.random() * H,
-      vx: (Math.random() - .5) * .22 * DPR, vy: (Math.random() - .5) * .22 * DPR,
-    }));
+  /* ---------- library counters (read from the engine — never advertised, always measured) */
+  if (window.DecoderEngine) {
+    const E = window.DecoderEngine;
+    const sigs = E.TAXONOMY.reduce((n, t) => n + t.patterns.length, 0);
+    $("#n-classes").textContent = E.TAXONOMY.length + " classes";
+    $("#n-sigs").textContent = sigs + " signatures";
+    $("#n-fams").textContent = Object.keys(E.FAMILIES).length + " indices";
+    $("#hud-lib").textContent = E.TAXONOMY.length + " CLASSES · " + sigs + " SIGNATURES";
   }
-  size(); addEventListener("resize", size);
-  (function loop() {
-    x.clearRect(0, 0, W, H);
-    for (const p of pts) {
-      p.x += p.vx; p.y += p.vy;
-      if (p.x < 0 || p.x > W) p.vx *= -1;
-      if (p.y < 0 || p.y > H) p.vy *= -1;
+
+  /* ================= INK GRAIN SYSTEM ================= */
+  const cv = $("#ink"), cx = cv.getContext("2d");
+  let W = 0, H = 0, DPR = 1;
+  const N = innerWidth < 760 ? 1500 : 3200;
+  const grains = [];
+  for (let i = 0; i < N; i++) {
+    grains.push({
+      x: Math.random(), y: Math.random(), vx: 0, vy: 0,
+      tx: 0, ty: 0, len: 3 + Math.random() * 6, ang: Math.random() * Math.PI,
+      tone: Math.random(), delay: Math.random(),
+    });
+  }
+  function size() {
+    DPR = Math.min(devicePixelRatio || 1, 1.75);
+    W = cv.width = innerWidth * DPR; H = cv.height = innerHeight * DPR;
+    cv.style.width = "100%"; cv.style.height = "100%";
+    grains.forEach(g => { g.x = Math.random() * W; g.y = Math.random() * H; });
+    retarget(scene, true);
+  }
+
+  /* --- shape sampling: rasterize text, keep filled pixels as normalized points */
+  const shapeCache = {};
+  function sampleText(str, fontPx, fontFam) {
+    const key = str + "|" + fontFam;
+    if (shapeCache[key]) return shapeCache[key];
+    const oc = document.createElement("canvas"); oc.width = oc.height = 480;
+    const o = oc.getContext("2d");
+    o.fillStyle = "#000"; o.textAlign = "center"; o.textBaseline = "middle";
+    o.font = "900 " + fontPx + "px " + fontFam;
+    o.fillText(str, 240, 250);
+    const d = o.getImageData(0, 0, 480, 480).data;
+    const pts = [];
+    for (let y = 0; y < 480; y += 3) for (let x = 0; x < 480; x += 3) {
+      if (d[(y * 480 + x) * 4 + 3] > 120) pts.push([x / 480, y / 480]);
     }
-    const R = 150 * DPR;
-    x.lineWidth = DPR;
-    for (let i = 0; i < pts.length; i++) {
-      for (let j = i + 1; j < pts.length; j++) {
-        const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
-        const d2 = dx * dx + dy * dy;
-        if (d2 < R * R) {
-          x.strokeStyle = `rgba(110,231,192,${0.11 * (1 - d2 / (R * R))})`;
-          x.beginPath(); x.moveTo(pts[i].x, pts[i].y); x.lineTo(pts[j].x, pts[j].y); x.stroke();
-        }
+    shapeCache[key] = pts;
+    return pts;
+  }
+
+  /* --- scenes: each provides target points inside a viewport region */
+  let scene = "glyph";
+  let heroGlyph = "B";
+  const CASTS = ["B", "S", "?", "&", "@"];
+  let region = { x: 0, y: 0, w: 0, h: 0, lastTop: 0 };
+
+  function rectOf(el, pad) {
+    const r = el.getBoundingClientRect();
+    return { x: (r.left + (pad || 0)) * DPR, y: r.top * DPR, w: (r.width - 2 * (pad || 0)) * DPR, h: r.height * DPR };
+  }
+  function sceneRegion(name) {
+    if (name === "glyph") { const el = $("#glyphside"); return el ? rectOf(el, 10) : null; }
+    if (name === "dust") { const el = $("#hallstage"); return el ? rectOf(el, 0) : null; }
+    return null;
+  }
+  function assignShape(pts, reg, spreadExtras, scale) {
+    const size = Math.min(reg.w, reg.h) * (scale || 1);
+    const offX = reg.x + (reg.w - size) / 2, offY = reg.y + (reg.h - size) / 2;
+    grains.forEach((g, i) => {
+      if (i < pts.length || pts.length === 0) {
+        const p = pts[i % Math.max(pts.length, 1)] || [Math.random(), Math.random()];
+        g.tx = offX + p[0] * size + (Math.random() - .5) * 3 * DPR;
+        g.ty = offY + p[1] * size + (Math.random() - .5) * 3 * DPR;
+        g.inShape = true;
+      } else if (spreadExtras) {
+        g.tx = Math.random() * W; g.ty = Math.random() * H; g.inShape = false;
+      } else { g.inShape = false; g.tx = g.x; g.ty = g.y; }
+    });
+  }
+  function assignMargins() {
+    grains.forEach(g => {
+      const side = Math.random();
+      g.inShape = false;
+      if (side < .5) { g.tx = (side < .25 ? Math.random() * .06 : .94 + Math.random() * .06) * W; g.ty = Math.random() * H; }
+      else { g.tx = Math.random() * W; g.ty = (side < .75 ? Math.random() * .08 : .92 + Math.random() * .08) * H; }
+    });
+  }
+  function retarget(name, force) {
+    if (name === scene && !force) return;
+    scene = name;
+    const reg = sceneRegion(name);
+    if (name === "glyph" && reg) { region = reg; region.lastTop = reg.y; assignShape(sampleText(heroGlyph, 380, "Fraunces, Georgia, serif"), reg, true); }
+    else if (name === "dust" && reg) {
+      region = reg; region.lastTop = reg.y;
+      const pts = sampleText("“", 460, "Fraunces, Georgia, serif");
+      assignShape(pts, reg, true, 1.45);
+      $("#dustcount").textContent = Math.min(pts.length, N).toLocaleString();
+    }
+    else if (name === "frame") { // thin halo around the specimen plate
+      const el = document.querySelector('[data-scene="frame"] .plate');
+      if (el) {
+        const r = rectOf(el, -14);
+        grains.forEach(g => {
+          g.inShape = false;
+          const t = Math.random() * 2 * (r.w + r.h);
+          if (t < r.w) { g.tx = r.x + t; g.ty = r.y + (Math.random() < .5 ? 0 : r.h); }
+          else { g.tx = r.x + (Math.random() < .5 ? 0 : r.w); g.ty = r.y + Math.random() * r.h; }
+          g.tx += (Math.random() - .5) * 18 * DPR; g.ty += (Math.random() - .5) * 18 * DPR;
+        });
+        region = r; region.lastTop = r.y;
       }
-      x.fillStyle = "rgba(110,231,192,0.30)";
-      x.beginPath(); x.arc(pts[i].x, pts[i].y, 1.5 * DPR, 0, 6.2832); x.fill();
     }
-    requestAnimationFrame(loop);
-  })();
+    else assignMargins();
+    grains.forEach(g => { g.delay = Math.random() * 0.5; });
+  }
+
+  /* --- pointer: carve (repulse) + hold-to-focus in the hall */
+  const ptr = { x: -9999, y: -9999 };
+  let focusing = false;
+  addEventListener("pointermove", e => {
+    ptr.x = e.clientX * DPR; ptr.y = e.clientY * DPR;
+    if (focusing) { const fr = $("#focusring"); fr.style.left = e.clientX + "px"; fr.style.top = e.clientY + "px"; }
+  }, { passive: true });
+  addEventListener("pointerdown", e => {
+    if (scene !== "dust" || RM) return;
+    const st = $("#hallstage").getBoundingClientRect();
+    if (e.clientX >= st.left && e.clientX <= st.right && e.clientY >= st.top && e.clientY <= st.bottom) {
+      focusing = true;
+      const fr = $("#focusring"); fr.style.left = e.clientX + "px"; fr.style.top = e.clientY + "px"; fr.classList.add("on");
+      $("#hud-state").textContent = "FOCUSING";
+    }
+  });
+  addEventListener("pointerup", () => {
+    if (focusing) { focusing = false; $("#focusring").classList.remove("on"); $("#hud-state").textContent = "IN THE HALL"; }
+  });
+
+  /* --- hall mix: how deep into the dark room we are (drives bg, hud, grain colour) */
+  let hallMix = 0;
+  function computeHallMix() {
+    const hall = document.querySelector(".room.hall");
+    if (!hall) return 0;
+    const r = hall.getBoundingClientRect();
+    const vh = innerHeight;
+    const cover = clamp((Math.min(r.bottom, vh) - Math.max(r.top, 0)) / vh, 0, 1);
+    return clamp(cover * 1.5 - 0.2, 0, 1);
+  }
+
+  /* --- main loop */
+  const INK = [25, 22, 17], BONE = [239, 231, 214], AMBER = [215, 157, 74];
+  let t0 = performance.now();
+  function frame(now) {
+    const dt = clamp((now - t0) / 16.7, 0.4, 2.2); t0 = now;
+
+    /* glue targets to the scrolling section */
+    const reg = sceneRegion(scene === "frame" ? null : scene) ||
+      (scene === "frame" ? (function () { const el = document.querySelector('[data-scene="frame"] .plate'); return el ? rectOf(el, -14) : null; })() : null);
+    if (reg && region.w) {
+      const dy = reg.y - region.lastTop;
+      if (dy) { grains.forEach(g => { g.ty += dy; }); region.lastTop = reg.y; }
+    }
+
+    hallMix = computeHallMix();
+    $("#hallbg").style.opacity = hallMix.toFixed(3);
+    document.getElementById("hud").classList.toggle("inverted", hallMix > 0.5);
+
+    cx.clearRect(0, 0, W, H);
+    const k = (focusing ? 0.16 : 0.055) * dt;
+    const jit = focusing ? 0.12 : 1;
+    const R = 90 * DPR, R2 = R * R;
+
+    /* integrate */
+    for (const g of grains) {
+      let ax = (g.tx - g.x) * k, ay = (g.ty - g.y) * k;
+      const dx = g.x - ptr.x, dy2 = g.y - ptr.y, d2 = dx * dx + dy2 * dy2;
+      if (d2 < R2 && d2 > 1 && !RM) {
+        const f = (1 - d2 / R2) * 4.2 * dt;
+        ax += (dx / Math.sqrt(d2)) * f * DPR; ay += (dy2 / Math.sqrt(d2)) * f * DPR;
+      }
+      g.vx = (g.vx + ax) * 0.86; g.vy = (g.vy + ay) * 0.86;
+      g.x += g.vx * dt + Math.sin(now / 900 + g.delay * 40) * 0.12 * jit;
+      g.y += g.vy * dt + Math.cos(now / 1100 + g.delay * 60) * 0.12 * jit;
+    }
+
+    /* draw — 3 alpha buckets, one stroke() each */
+    for (let b = 0; b < 3; b++) {
+      const path = new Path2D();
+      for (let i = b; i < grains.length; i += 3) {
+        const g = grains[i];
+        const dx = Math.cos(g.ang) * g.len * DPR * .5, dy = Math.sin(g.ang) * g.len * DPR * .5;
+        path.moveTo(g.x - dx, g.y - dy); path.lineTo(g.x + dx, g.y + dy);
+      }
+      const amber = b === 2 && hallMix > .4;
+      const c0 = amber ? AMBER : INK, c1 = amber ? AMBER : BONE;
+      const r = Math.round(lerp(c0[0], c1[0], hallMix)),
+            gg = Math.round(lerp(c0[1], c1[1], hallMix)),
+            bb = Math.round(lerp(c0[2], c1[2], hallMix));
+      cx.strokeStyle = "rgba(" + r + "," + gg + "," + bb + "," + (0.35 + b * 0.22) + ")";
+      cx.lineWidth = (0.9 + b * 0.35) * DPR;
+      cx.stroke(path);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ================= HERO CASTS ================= */
+  const castrow = $("#castrow");
+  CASTS.forEach(ch => {
+    const b = document.createElement("button");
+    b.className = "castbtn" + (ch === heroGlyph ? " active" : "");
+    b.textContent = ch;
+    b.addEventListener("click", () => {
+      heroGlyph = ch; autoCast = false; syncAuto();
+      castrow.querySelectorAll(".castbtn").forEach(x => x.classList.toggle("active", x.textContent === ch));
+      $("#glyph-state").textContent = "RECAST";
+      setTimeout(() => $("#glyph-state").textContent = "CAST", 900);
+      retarget("glyph", true);
+    });
+    castrow.appendChild(b);
+  });
+  let autoCast = !RM;
+  const autoBtn = document.createElement("button");
+  autoBtn.className = "autocast";
+  autoBtn.textContent = "auto-cast";
+  function syncAuto() { autoBtn.setAttribute("aria-pressed", String(autoCast)); }
+  syncAuto();
+  autoBtn.addEventListener("click", () => { autoCast = !autoCast; syncAuto(); });
+  castrow.appendChild(autoBtn);
+  setInterval(() => {
+    if (!autoCast || scene !== "glyph" || document.hidden) return;
+    heroGlyph = CASTS[(CASTS.indexOf(heroGlyph) + 1) % CASTS.length];
+    castrow.querySelectorAll(".castbtn").forEach(x => x.classList.toggle("active", x.textContent === heroGlyph));
+    retarget("glyph", true);
+  }, 4200);
+
+  /* ================= LIVING SPECIMEN ================= */
+  const SPECIMENS = [
+    "I can't believe you'd accuse me of that. After everything I've done for you. You're just being sensitive. That never happened.",
+    "Why didn't you answer? I checked your phone. Your friends are toxic and it should be just us.",
+    "I'm sorry you feel that way. Look what you made me do — if you really loved me you'd drop it.",
+  ];
+  let specIdx = 0, specBusy = false;
+  const GLYPHS = "abcdefghijklmnopqrstuvwxyz&?!;:·";
+  const specEl = $("#specimen");
+
+  async function castSpecimen() {
+    if (specBusy || !window.DecoderEngine) return;
+    specBusy = true;
+    const text = SPECIMENS[specIdx % SPECIMENS.length];
+    if (!RM) {
+      for (let i = 0; i <= text.length; i += 2) {
+        specEl.textContent = text.slice(0, i) +
+          text.slice(i, Math.min(i + 7, text.length)).split("")
+            .map(c => c === " " ? " " : GLYPHS[(Math.random() * GLYPHS.length) | 0]).join("");
+        await new Promise(r => setTimeout(r, 14));
+      }
+    }
+    const res = DecoderEngine.analyze(text);
+    let html = "", cur = 0;
+    res.hits.forEach((h, i) => {
+      const t = res.tacticsById[h.tacticId];
+      html += esc(text.slice(cur, h.start));
+      html += '<mark tabindex="0" data-i="' + i + '">' + esc(h.text) +
+              '<span class="pin">' + esc(t.label.split("/")[0].trim()) + "</span></mark>";
+      cur = h.end;
+    });
+    html += esc(text.slice(cur));
+    specEl.innerHTML = html;
+    specEl._res = res;
+
+    const fams = Object.entries(res.indices).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    $("#readbar").innerHTML = fams.map(([k, v]) =>
+      '<div class="readrow"><span>' + esc(DecoderEngine.FAMILIES[k].label) + '</span>' +
+      '<span class="bar"><span class="fill" data-w="' + v + '"></span></span><span class="num">' + v + "</span></div>").join("");
+    requestAnimationFrame(() => document.querySelectorAll("#readbar .fill")
+      .forEach(f => f.style.width = f.dataset.w + "%"));
+    specBusy = false;
+  }
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  $("#recast").addEventListener("click", () => { specIdx++; castSpecimen(); });
+
+  /* popcard */
+  const pop = $("#popcard");
+  document.addEventListener("click", e => {
+    const m = e.target.closest("#specimen mark");
+    if (!m) { if (!e.target.closest("#popcard")) pop.hidden = true; return; }
+    const res = specEl._res; if (!res) return;
+    const h = res.hits[+m.dataset.i], t = res.tacticsById[h.tacticId];
+    pop.innerHTML = '<span class="pc-tag">' + esc(DecoderEngine.FAMILIES[t.family].label) + "</span>" +
+      "<h4>" + esc(t.label) + "</h4><p>" + esc(t.mechanism.split(". ").slice(0, 2).join(". ")) + ".</p>" +
+      '<p style="font-style:italic">Try: “' + esc(t.scripts[0]) + '”</p>' +
+      '<span class="pc-src">' + esc(t.lineage) + "</span>";
+    const plate = m.closest(".plate").getBoundingClientRect(), mr = m.getBoundingClientRect();
+    pop.style.left = clamp(mr.left - plate.left, 0, plate.width - 370) + "px";
+    pop.style.top = (mr.bottom - plate.top + 12) + "px";
+    pop.hidden = false;
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") pop.hidden = true;
+    const m = e.target.closest && e.target.closest("#specimen mark");
+    if (m && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); m.click(); }
+  });
+
+  /* ================= AUDIO EVIDENCE (hall) ================= */
+  let audioBuf = null, audioCtx = null, playing = null, playT0 = 0, playOff = 0;
+  const wave = $("#inkwave"), wx = wave.getContext("2d");
+  let peaks = null;
+  async function buildAudio() {
+    const sr = 22050, dur = 3.2;
+    const oc = new OfflineAudioContext(1, sr * dur, sr);
+    const master = oc.createGain(); master.gain.value = 0.5; master.connect(oc.destination);
+    const lp = oc.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 480; lp.connect(master);
+    const trem = oc.createGain(); trem.connect(lp);
+    const lfo = oc.createOscillator(); lfo.frequency.value = 2.3;
+    const lg = oc.createGain(); lg.gain.value = 0.45; lfo.connect(lg); lg.connect(trem.gain);
+    lfo.start();
+    [168, 224, 149].forEach(f => {
+      const o = oc.createOscillator(); o.type = "sawtooth"; o.frequency.value = f;
+      o.frequency.setTargetAtTime(f * 0.8, dur * 0.45, 1.4);
+      const og = oc.createGain(); og.gain.value = 0.3;
+      og.gain.setValueAtTime(0.0001, 0); og.gain.exponentialRampToValueAtTime(0.3, 0.3);
+      og.gain.setValueAtTime(0.3, dur - 0.5); og.gain.exponentialRampToValueAtTime(0.0001, dur);
+      o.connect(og); og.connect(trem); o.start();
+    });
+    audioBuf = await oc.startRendering();
+    const data = audioBuf.getChannelData(0), B = 220, step = (data.length / B) | 0;
+    peaks = new Float32Array(B);
+    for (let i = 0; i < B; i++) {
+      let m = 0; for (let j = 0; j < step; j += 4) m = Math.max(m, Math.abs(data[i * step + j]));
+      peaks[i] = m;
+    }
+  }
+  function drawWave(progress) {
+    const r = wave.getBoundingClientRect();
+    wave.width = r.width * DPR; wave.height = r.height * DPR;
+    wx.clearRect(0, 0, wave.width, wave.height);
+    if (!peaks) return;
+    const bw = wave.width / peaks.length, mid = wave.height / 2;
+    for (let i = 0; i < peaks.length; i++) {
+      const on = i / peaks.length <= (progress || 0);
+      const h = Math.max(peaks[i] * wave.height * 0.9, 2 * DPR);
+      const jx = Math.sin(i * 7.3) * 1.2 * DPR;
+      wx.strokeStyle = on ? "rgba(215,157,74,.95)" : "rgba(239,231,214,.4)";
+      wx.lineWidth = 1.4 * DPR;
+      wx.beginPath();
+      wx.moveTo(i * bw + jx, mid - h / 2); wx.lineTo(i * bw - jx, mid + h / 2);
+      wx.stroke();
+    }
+  }
+  function stopWave() {
+    if (playing) { try { playing.stop(); } catch (e) {} playing = null; }
+    $("#playwave").textContent = "▶ Play evidence";
+  }
+  async function playWave(offset) {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (!audioBuf) { $("#playwave").textContent = "… rendering"; await buildAudio(); drawWave(0); }
+    stopWave();
+    const src = audioCtx.createBufferSource(); src.buffer = audioBuf; src.connect(audioCtx.destination);
+    playOff = clamp(offset || 0, 0, audioBuf.duration - 0.05);
+    src.start(0, playOff); playT0 = audioCtx.currentTime; playing = src;
+    $("#playwave").textContent = "■ Stop";
+    src.onended = () => { if (playing === src) { playing = null; $("#playwave").textContent = "▶ Play evidence"; drawWave(0); } };
+    (function tick() {
+      if (!playing) return;
+      drawWave((playOff + audioCtx.currentTime - playT0) / audioBuf.duration);
+      requestAnimationFrame(tick);
+    })();
+  }
+  $("#playwave").addEventListener("click", () => { playing ? stopWave() : playWave(0); });
+  wave.addEventListener("click", e => {
+    if (!audioBuf) { playWave(0); return; }
+    const r = wave.getBoundingClientRect();
+    playWave(((e.clientX - r.left) / r.width) * audioBuf.duration);
+  });
+
+  /* ================= THE WALK (scenes, hud, reveals) ================= */
+  const rooms = [...document.querySelectorAll(".room")];
+  const sceneIO = new IntersectionObserver(es => {
+    es.forEach(e => {
+      if (!e.isIntersecting) return;
+      const r = e.target;
+      retarget(r.dataset.scene);
+      $("#hud-state").textContent = r.dataset.state;
+      $("#hud-room").textContent = "0" + (rooms.indexOf(r) + 1) + " — 05";
+      $("#walklive").textContent = "Now in room " + (rooms.indexOf(r) + 1) + ": " + r.dataset.state.toLowerCase();
+      if (r.dataset.scene === "frame" && !specEl._res) castSpecimen();
+      if (r.dataset.scene === "dust" && !peaks && !RM) buildAudio().then(() => drawWave(0));
+    });
+  }, { rootMargin: "-42% 0px -42% 0px" });
+  rooms.forEach(r => sceneIO.observe(r));
+
+  const revealIO = new IntersectionObserver(es =>
+    es.forEach(e => e.target.classList.toggle("in", e.isIntersecting)), { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach(el => revealIO.observe(el));
+
+  /* door departures */
+  document.querySelectorAll("[data-door]").forEach(a =>
+    a.addEventListener("click", e => {
+      if (RM) return;
+      e.preventDefault();
+      document.body.classList.add("depart");
+      setTimeout(() => location.href = a.href, 430);
+    }));
+
+  /* ================= boot ================= */
+  function boot() {
+    size();
+    addEventListener("resize", size);
+    if (RM) {
+      /* settle instantly, render once per scene change, keep it still */
+      grains.forEach(g => { g.x = g.tx; g.y = g.ty; });
+      (function still() {
+        grains.forEach(g => { g.x = lerp(g.x, g.tx, 0.5); g.y = lerp(g.y, g.ty, 0.5); });
+        hallMix = computeHallMix();
+        $("#hallbg").style.opacity = hallMix.toFixed(3);
+        document.getElementById("hud").classList.toggle("inverted", hallMix > 0.5);
+        cx.clearRect(0, 0, W, H);
+        cx.strokeStyle = hallMix > .5 ? "rgba(239,231,214,.7)" : "rgba(25,22,17,.7)";
+        cx.lineWidth = DPR;
+        const p = new Path2D();
+        grains.forEach(g => {
+          const dx = Math.cos(g.ang) * g.len * DPR * .5, dy = Math.sin(g.ang) * g.len * DPR * .5;
+          p.moveTo(g.x - dx, g.y - dy); p.lineTo(g.x + dx, g.y + dy);
+        });
+        cx.stroke(p);
+        setTimeout(() => requestAnimationFrame(still), 250);
+      })();
+      castSpecimen();
+    } else {
+      requestAnimationFrame(frame);
+    }
+  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(boot);
+  else boot();
 })();
 </script>
 </body>
