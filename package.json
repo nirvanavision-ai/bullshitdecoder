@@ -1,0 +1,12 @@
+{
+  "name": "bullshitdecoder",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deception Decoder — names manipulation and coercive-control patterns in a message. Static site, no build step, no dependencies.",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "dev": "python3 -m http.server 8080",
+    "build": "node build-standalone.js"
+  }
+}
