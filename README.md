@@ -29,7 +29,23 @@ The architecture leaves the door open: `analyze()` is a pure function with a sta
 shape, so an optional server-side enrichment path can be layered on later without touching
 the UI.
 
-## Project structure
+## Site structure
+
+```
+/                    landing — the experience and entry point
+/decoder/            The Deception Decoder (generated from src/page.html)
+/oblivion/           O.B.L.I.V.I.O.N. forensic reconstruction environment
+/gaslight/           The Gaslight Protocols argument-autopsy console
+/assets/             shared: site.css, engine.bundle.js, upload.js, decoder source
+```
+
+Every console runs on the same local engine (`assets/engine.bundle.js`, generated
+by `npm run build`). The two imported consoles originally called
+`api.anthropic.com` from the browser with no API key — every "LIVE" module
+returned 401 for visitors, and adding a key client-side would have published it.
+Both now use the local analyzer: no key, no network, nothing transmitted.
+
+## Legacy layout notes
 
 ```
 deception-decoder/

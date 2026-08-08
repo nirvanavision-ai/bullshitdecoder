@@ -14,8 +14,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/decoder.css">
+<link rel="stylesheet" href="../assets/css/site.css">
 </head>
 <body>
+<nav class="sitenav">
+  <a class="brand" href="../">THE BULLSHIT DECODER</a>
+  <div class="navlinks">
+    <a href="../decoder/" aria-current="page">Decoder</a>
+    <a href="../oblivion/">O.B.L.I.V.I.O.N.</a>
+    <a href="../gaslight/">Gaslight Protocols</a>
+  </div>
+  <span class="navtag">local analysis · nothing uploaded</span>
+</nav>
+
 <a class="skip" href="#input">Skip to the text box</a>
 
 <header class="masthead">
@@ -51,6 +62,7 @@
       <button class="quiet" id="clear">Clear</button>
       <span class="counter" id="counter">0 characters</span>
     </div>
+    <div id="uploader"></div>
   </section>
 
   <section class="results" id="results" hidden aria-live="polite">
@@ -111,5 +123,24 @@
     Nothing is sent to a server either way.
   </div>
 </noscript>
+<script src="../assets/js/upload.js"></script>
+<script>
+/* Load a transcript, message export, or note straight into the analyser.
+   Media files attach a local player — useful when the recording is the record. */
+window.addEventListener("DOMContentLoaded", function () {
+  var host = document.getElementById("uploader");
+  if (host && window.mountUploader) {
+    mountUploader(host, {
+      label: "Analyse a file · or attach audio / video",
+      onText: function (text) {
+        var box = document.getElementById("input");
+        box.value = (box.value ? box.value + "\n\n" : "") + text;
+        box.dispatchEvent(new Event("input"));
+        document.getElementById("decode").click();
+      },
+    });
+  }
+});
+</script>
 </body>
 </html>

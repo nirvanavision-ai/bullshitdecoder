@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>O.B.L.I.V.I.O.N. — Forensic Reconstruction Environment</title>
+<style>
+  :root{
+    --concrete:#16181c;
+    --slab:#1e2228;
+    --slab-hi:#252a31;
+    --edge:#333a43;
+    --bone:#dfe3e6;
+    --dim:#79838d;
+    --ice:#7fd4e8;
+    --decay:#ff3d7f;
+    --amber:#f2b134;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Courier New",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--concrete);
+    color:var(--bone);
+    font-family:var(--mono);
+    font-size:13px;
+    line-height:1.5;
+    min-height:100%;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--ice);color:#0b0d10}
+  button{font-family:inherit}
+  :focus-visible{outline:2px solid var(--ice);outline-offset:2px}
+
+  /* ---------- OS CHROME ---------- */
+  .menubar{
+    display:flex;align-items:center;gap:0;
+    background:var(--slab);border-bottom:1px solid var(--edge);
+    height:34px;padding:0 12px;position:sticky;top:0;z-index:50;
+  }
+  .menubar .sys{
+    font-size:10px;letter-spacing:.24em;font-weight:700;color:var(--bone);
+    padding-right:18px;border-right:1px solid var(--edge);margin-right:14px;
+  }
+  .menubar .item{font-size:10px;letter-spacing:.14em;color:var(--dim);padding:0 12px}
+  .menubar .spacer{flex:1}
+  .menubar .stat{font-size:10px;letter-spacing:.12em;color:var(--dim);padding-left:16px}
+  .menubar .stat b{color:var(--ice);font-weight:400}
+  .menubar .stat.hot b{color:var(--decay)}
+
+  /* ---------- MASTHEAD ---------- */
+  .masthead{
+    padding:44px 28px 34px;border-bottom:1px solid var(--edge);
+    background:
+      linear-gradient(180deg, rgba(127,212,232,.035), transparent 70%),
+      var(--concrete);
+  }
+  .masthead-inner{max-width:1240px;margin:0 auto}
+  .eyebrow{
+    font-size:10px;letter-spacing:.42em;color:var(--dim);margin-bottom:20px;
+  }
+  h1{
+    font-family:Helvetica,Arial,sans-serif;
+    font-size:clamp(30px,6.2vw,66px);
+    font-weight:800;letter-spacing:-.035em;line-height:.92;
+    margin-bottom:20px;text-transform:uppercase;
+  }
+  h1 .thin{font-weight:200;color:var(--dim)}
+  .thesis{
+    max-width:660px;font-size:14px;line-height:1.75;color:#aeb6bd;
+    border-left:2px solid var(--decay);padding-left:18px;
+  }
+  .thesis b{color:var(--bone);font-weight:400}
+
+  /* ---------- LAYOUT ---------- */
+  .shell{max-width:1240px;margin:0 auto;padding:28px 20px 80px}
+  section{margin-bottom:34px;scroll-margin-top:44px}
+  .sechead{
+    display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+    border-bottom:1px solid var(--edge);padding-bottom:10px;margin-bottom:20px;
+  }
+  .sechead h2{
+    font-family:Helvetica,Arial,sans-serif;
+    font-size:15px;font-weight:800;letter-spacing:.02em;text-transform:uppercase;
+  }
+  .sechead .note{font-size:10.5px;letter-spacing:.1em;color:var(--dim);flex:1}
+  .tag{
+    font-size:9px;letter-spacing:.18em;padding:3px 8px;border:1px solid currentColor;
+    white-space:nowrap;
+  }
+  .tag.live{color:var(--ice)}
+  .tag.sim{color:var(--amber)}
+  .tag.hot{color:var(--decay)}
+
+  /* ---------- VIEWPORT ---------- */
+  .viewport-wrap{
+    display:grid;grid-template-columns:1fr 268px;gap:1px;
+    background:var(--edge);border:1px solid var(--edge);
+  }
+  @media (max-width:820px){.viewport-wrap{grid-template-columns:1fr}}
+  .canvas-cell{background:#0b0d10;position:relative;min-height:380px;overflow:hidden}
+  #splat{display:block;width:100%;height:100%}
+  .vp-overlay{
+    position:absolute;inset:0;pointer-events:none;
+    display:flex;flex-direction:column;justify-content:space-between;padding:14px 16px;
+  }
+  .vp-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .vp-label{
+    font-size:9.5px;letter-spacing:.2em;color:var(--dim);
+    background:rgba(11,13,16,.7);padding:4px 8px;
+  }
+  .vp-label b{color:var(--ice);font-weight:400}
+  .vp-label.hot b{color:var(--decay)}
+  .integrity{
+    font-family:Helvetica,Arial,sans-serif;font-size:clamp(28px,5vw,52px);
+    font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--ice);
+  }
+  .integrity.hot{color:var(--decay)}
+  .integrity-sub{font-size:9.5px;letter-spacing:.2em;color:var(--dim);margin-top:4px}
+
+  .vp-side{background:var(--slab);padding:18px 16px;display:flex;flex-direction:column;gap:20px}
+  .ctl label{
+    display:block;font-size:9.5px;letter-spacing:.18em;color:var(--dim);margin-bottom:8px;
+  }
+  .envbtns{display:flex;flex-direction:column;gap:6px}
+  .envbtn{
+    text-align:left;background:var(--concrete);border:1px solid var(--edge);
+    color:var(--dim);font-size:10.5px;letter-spacing:.12em;padding:9px 11px;cursor:pointer;
+  }
+  .envbtn:hover{color:var(--bone);border-color:var(--dim)}
+  .envbtn.on{color:var(--ice);border-color:var(--ice);background:rgba(127,212,232,.06)}
+  input[type=range]{width:100%;accent-color:var(--decay);background:transparent}
+  .rngval{font-size:10px;letter-spacing:.14em;color:var(--decay);margin-top:6px}
+  .readout{font-size:10px;letter-spacing:.1em;color:var(--dim);line-height:1.9}
+  .readout span{color:var(--bone)}
+
+  /* ---------- SUBJECTS ---------- */
+  .subjects{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1px;background:var(--edge);border:1px solid var(--edge)}
+  .subj{background:var(--slab);padding:0}
+  .subj-canvas{width:100%;height:150px;display:block;background:#0b0d10}
+  .subj-body{padding:14px 16px 16px}
+  .subj-id{font-size:9.5px;letter-spacing:.2em;color:var(--dim);margin-bottom:5px}
+  .subj-name{
+    font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:800;
+    letter-spacing:-.01em;text-transform:uppercase;margin-bottom:9px;
+  }
+  .subj-desc{font-size:11.5px;line-height:1.65;color:#98a1a9}
+  .subj-meta{
+    margin-top:11px;padding-top:10px;border-top:1px solid var(--edge);
+    font-size:9.5px;letter-spacing:.13em;color:var(--dim);
+  }
+  .subj-meta b{color:var(--ice);font-weight:400}
+
+  /* ---------- ARCHIVE ---------- */
+  .gate{
+    border:1px solid var(--decay);background:rgba(255,61,127,.05);
+    padding:22px 24px;
+  }
+  .gate h3{
+    font-family:Helvetica,Arial,sans-serif;font-size:13px;font-weight:800;
+    letter-spacing:.04em;text-transform:uppercase;color:var(--decay);margin-bottom:12px;
+  }
+  .gate p{font-size:12px;line-height:1.75;color:#aeb6bd;max-width:640px;margin-bottom:10px}
+  .gate ul{margin:0 0 16px 18px;font-size:11.5px;line-height:1.85;color:#98a1a9}
+  .btn{
+    background:var(--bone);color:#0b0d10;border:none;
+    font-size:10.5px;letter-spacing:.16em;font-weight:700;padding:11px 20px;cursor:pointer;
+  }
+  .btn:hover{background:#fff}
+  .btn:disabled{opacity:.35;cursor:not-allowed}
+  .btn.ghost{background:none;border:1px solid var(--edge);color:var(--dim);font-weight:400}
+  .btn.ghost:hover{color:var(--bone);border-color:var(--bone);background:none}
+
+  .droparea{
+    border:1px dashed var(--edge);padding:26px;text-align:center;
+    background:var(--slab);transition:border-color .2s,background .2s;
+  }
+  .droparea.over{border-color:var(--ice);background:rgba(127,212,232,.05)}
+  .droparea p{font-size:11.5px;color:var(--dim);margin-bottom:14px}
+
+  .clip{
+    display:grid;grid-template-columns:44px 1fr 190px;gap:14px;align-items:center;
+    background:var(--slab);border:1px solid var(--edge);padding:12px 14px;margin-bottom:8px;
+  }
+  @media (max-width:700px){.clip{grid-template-columns:44px 1fr;}.clip .clip-wave{display:none}}
+  .clip.playing{border-color:var(--decay);background:var(--slab-hi)}
+  .playbtn{
+    width:44px;height:44px;border:1px solid var(--edge);background:var(--concrete);
+    color:var(--bone);cursor:pointer;font-size:12px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .playbtn:hover{border-color:var(--bone)}
+  .clip.playing .playbtn{background:var(--decay);border-color:var(--decay);color:#0b0d10}
+  .clip-main{min-width:0}
+  .clip-title{font-size:12.5px;color:var(--bone);margin-bottom:4px}
+  .clip-meta{font-size:9.5px;letter-spacing:.13em;color:var(--dim)}
+  .clip-meta .cw{color:var(--decay)}
+  .clip-meta .src{color:var(--amber)}
+  .clip-wave{height:34px;display:flex;align-items:flex-end;gap:2px}
+  .clip-wave i{flex:1;background:var(--edge);height:12%;display:block}
+  .clip.playing .clip-wave i{background:var(--decay)}
+
+  .transcript{
+    grid-column:1/-1;margin-top:12px;padding:12px 14px;border-top:1px solid var(--edge);
+    font-size:11.5px;line-height:1.8;color:#98a1a9;
+  }
+  .transcript b{color:var(--ice);font-weight:400;letter-spacing:.14em;font-size:9.5px;display:block;margin-bottom:6px}
+
+  /* ---------- MODULES ---------- */
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1px;background:var(--edge);border:1px solid var(--edge)}
+  .mod{background:var(--slab);padding:18px 18px 20px}
+  .mod h3{
+    font-family:Helvetica,Arial,sans-serif;font-size:12px;font-weight:800;
+    letter-spacing:.04em;text-transform:uppercase;margin-bottom:5px;
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .mod .hint{font-size:11px;color:var(--dim);line-height:1.6;margin-bottom:14px}
+  textarea,input[type=text],select{
+    width:100%;background:var(--concrete);border:1px solid var(--edge);color:var(--bone);
+    font-family:inherit;font-size:12.5px;line-height:1.6;padding:10px 12px;resize:vertical;
+  }
+  textarea:focus,input:focus,select:focus{outline:none;border-color:var(--ice)}
+  .flabel{display:block;font-size:9.5px;letter-spacing:.18em;color:var(--dim);margin:12px 0 6px}
+  .flabel:first-child{margin-top:0}
+  .out{
+    margin-top:12px;font-size:12.5px;line-height:1.75;color:var(--ice);
+    white-space:pre-wrap;min-height:18px;
+  }
+  .out.err{color:var(--decay)}
+  .scanout{
+    margin-top:12px;border-left:2px solid var(--decay);padding:11px 14px;
+    background:rgba(255,61,127,.05);font-size:12.5px;line-height:1.7;color:#c9d0d6;min-height:16px;
+  }
+  .scanout b{display:block;font-size:9.5px;letter-spacing:.2em;color:var(--decay);margin-bottom:6px}
+  .caret{display:inline-block;width:7px;height:13px;background:var(--ice);animation:blink 1s steps(1) infinite;vertical-align:-2px}
+  @keyframes blink{50%{opacity:0}}
+
+  footer{
+    border-top:1px solid var(--edge);padding:22px 20px;
+    max-width:1240px;margin:0 auto;
+    display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    font-size:9.5px;letter-spacing:.18em;color:var(--dim);
+  }
+
+  /* ---------- BRIEFINGS ---------- */
+  .briefs{display:grid;grid-template-columns:repeat(auto-fit,minmax(268px,1fr));gap:1px;background:var(--edge);border:1px solid var(--edge)}
+  .brief{background:var(--slab);display:flex;flex-direction:column}
+  .brief-thumb{
+    position:relative;aspect-ratio:16/9;background:#0b0d10;overflow:hidden;
+    border:none;padding:0;width:100%;cursor:pointer;display:block;
+  }
+  .brief-thumb[disabled]{cursor:default}
+  .brief-thumb canvas{display:block;width:100%;height:100%}
+  .brief-thumb img{display:block;width:100%;height:100%;object-fit:cover;opacity:.55;transition:opacity .25s}
+  .brief-thumb:hover img{opacity:.8}
+  .brief-play{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    pointer-events:none;
+  }
+  .brief-play span{
+    width:46px;height:46px;border:1px solid var(--bone);background:rgba(11,13,16,.72);
+    display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--bone);
+    transition:background .2s,border-color .2s,color .2s;
+  }
+  .brief-thumb:hover .brief-play span{background:var(--ice);border-color:var(--ice);color:#0b0d10}
+  .brief-dur{
+    position:absolute;right:8px;bottom:8px;font-size:9px;letter-spacing:.14em;
+    background:rgba(11,13,16,.85);padding:3px 6px;color:var(--bone);
+  }
+  .brief-unlinked{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:9.5px;letter-spacing:.2em;color:var(--dim);background:rgba(11,13,16,.6);
+  }
+  .brief-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column}
+  .brief-num{font-size:9.5px;letter-spacing:.2em;color:var(--dim);margin-bottom:6px}
+  .brief-title{
+    font-family:Helvetica,Arial,sans-serif;font-size:13.5px;font-weight:800;
+    letter-spacing:-.01em;line-height:1.25;margin-bottom:8px;
+  }
+  .brief-desc{font-size:11.5px;line-height:1.65;color:#98a1a9;flex:1}
+  .brief-mech{
+    margin-top:11px;padding-top:10px;border-top:1px solid var(--edge);
+    font-size:9.5px;letter-spacing:.13em;color:var(--dim);
+  }
+  .brief-mech b{color:var(--ice);font-weight:400}
+  .brief iframe{width:100%;aspect-ratio:16/9;border:0;display:block}
+  .channel-cta{
+    margin-top:14px;border:1px solid var(--edge);background:var(--slab);
+    padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
+  }
+  .channel-cta p{font-size:11.5px;color:var(--dim);line-height:1.65;max-width:520px}
+  .channel-cta a{color:var(--ice);text-decoration:none;border-bottom:1px solid currentColor}
+
+  @media (prefers-reduced-motion: reduce){
+    .caret{animation:none}
+  }
+</style>
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%236ee7c0%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-family=%27system-ui%27 font-size=%2720%27 font-weight=%27700%27 text-anchor=%27middle%27 fill=%27%2308201a%27%3ED%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<nav class="sitenav">
+  <a class="brand" href="../">THE BULLSHIT DECODER</a>
+  <div class="navlinks">
+    <a href="../decoder/">Decoder</a>
+    <a href="../oblivion/" aria-current="page">O.B.L.I.V.I.O.N.</a>
+    <a href="../gaslight/">Gaslight Protocols</a>
+  </div>
+  <span class="navtag">local analysis · nothing uploaded</span>
+</nav>
+
+
+<div class="menubar">
+  <span class="sys">O.B.L.I.V.I.O.N.</span>
+  <span class="item">ENVIRONMENT</span>
+  <span class="item">SUBJECTS</span>
+  <span class="item">ARCHIVE</span>
+  <span class="item">BRIEFINGS</span>
+  <span class="item">ANALYSIS</span>
+  <span class="spacer"></span>
+  <span class="stat" id="statEnv">ENV <b>RESIDENCE</b></span>
+  <span class="stat hot" id="statDist">DISTORTION <b>0%</b></span>
+</div>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <div class="eyebrow">FORENSIC RECONSTRUCTION ENVIRONMENT / BUILD 7 / CASE 420-EGG</div>
+    <h1>The Architecture<br><span class="thin">of</span> Coercive Control</h1>
+    <p class="thesis">
+      Coercion rarely arrives as violence. It arrives as <b>renovation</b> — a slow, patient
+      remodelling of what a person is permitted to believe they saw, felt, and remember.
+      This environment reconstructs that process from the inside: the rooms it happened in,
+      the voices that did it, and the exact frames where a shared reality stopped holding.
+      <b>Nothing here is an accusation. Everything here is a mechanism.</b>
+    </p>
+  </div>
+</div>
+
+<div class="shell">
+
+  <!-- ============ VIEWPORT ============ -->
+  <section id="environment">
+    <div class="sechead">
+      <h2>Environment Render</h2>
+      <span class="note">Point-cloud reconstruction. Structural integrity degrades as distortion rises.</span>
+      <span class="tag hot">LIVE DEGRADATION</span>
+    </div>
+
+    <div class="viewport-wrap">
+      <div class="canvas-cell">
+        <canvas id="splat"></canvas>
+        <div class="vp-overlay">
+          <div class="vp-row">
+            <span class="vp-label">SCAN <b id="vpEnv">RESIDENCE / INTERIOR</b></span>
+            <span class="vp-label" id="vpPts">POINTS <b>—</b></span>
+          </div>
+          <div class="vp-row">
+            <div>
+              <div class="integrity" id="vpInteg">100</div>
+              <div class="integrity-sub">STRUCTURAL INTEGRITY</div>
+            </div>
+            <span class="vp-label hot" id="vpState">STATE <b>STABLE</b></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="vp-side">
+        <div class="ctl">
+          <label>Reconstructed Location</label>
+          <div class="envbtns" id="envBtns"></div>
+        </div>
+        <div class="ctl">
+          <label>Distortion Index</label>
+          <input type="range" id="distSlider" min="0" max="100" step="1" value="0">
+          <div class="rngval" id="distVal">0% — reality holding</div>
+        </div>
+        <div class="readout" id="readout"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SUBJECTS ============ -->
+  <section id="subjects">
+    <div class="sechead">
+      <h2>Subject Renders</h2>
+      <span class="note">Volumetric captures. Facial geometry is withheld by design, not obscured after the fact.</span>
+      <span class="tag sim">IDENTITY REDACTED</span>
+    </div>
+    <div class="subjects" id="subjects"></div>
+  </section>
+
+  <!-- ============ ARCHIVE ============ -->
+  <section id="archive">
+    <div class="sechead">
+      <h2>Audio Evidence Archive</h2>
+    <div id="uploaderEvidence"></div>
+      <span class="note">Reconstructed recordings. Playback drives environmental degradation in real time.</span>
+      <span class="tag hot">SENSITIVE</span>
+    </div>
+
+    <div class="gate" id="gate">
+      <h3>This archive contains distressing material</h3>
+      <p>
+        The recordings below reconstruct active gaslighting, panic response, and coercive
+        escalation. They are included because the mechanics of this behaviour are almost
+        impossible to convey in summary — the damage lives in the timing, the tone, and
+        the moment a person begins agreeing with a version of events they know is false.
+      </p>
+      <ul>
+        <li>All audio is synthetic reconstruction. No recording of any real person is published here.</li>
+        <li>Every clip carries a content label and a provenance label before it plays.</li>
+        <li>If you have lived this, it may land harder than you expect. You can skip the archive and still follow the analysis.</li>
+      </ul>
+      <button class="btn" id="gateBtn">Open the archive</button>
+      <button class="btn ghost" id="gateSkip" style="margin-left:8px">Skip — continue to analysis</button>
+    </div>
+
+    <div id="archiveBody" style="display:none">
+      <div id="clipList"></div>
+
+      <div class="droparea" id="drop" style="margin-top:14px">
+        <p>Add your own reconstructed audio — drop files here, or choose them.<br>
+           Files stay in this browser session only. Nothing is uploaded anywhere.</p>
+        <input type="file" id="fileInput" accept="audio/*" multiple style="display:none">
+        <button class="btn ghost" id="pickBtn">Choose audio files</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BRIEFINGS ============ -->
+  <section id="briefings">
+    <div class="sechead">
+      <h2>Field Briefings</h2>
+      <span class="note">Short explainers, in sequence. Each one isolates a single mechanism.</span>
+      <span class="tag live">VIDEO</span>
+    </div>
+    <div class="briefs" id="briefs"></div>
+    <div class="channel-cta" id="channelCta"></div>
+  </section>
+
+  <!-- ============ ANALYSIS ============ -->
+  <section id="analysis">
+    <div class="sechead">
+      <h2>Analysis Modules</h2>
+      <span class="note">Narration and fallacy detection run live. Voice and render services are simulated.</span>
+      <span class="tag live">2 LIVE</span>
+    </div>
+
+    <div class="grid2">
+      <div class="mod">
+        <h3>Narration Writer <span class="tag live">LIVE</span></h3>
+        <p class="hint">Writes the clinical voiceover for a reconstructed scene — flat, forensic, no sympathy and no cruelty.</p>
+        <label class="flabel">Scene</label>
+        <textarea id="fScene" rows="3">The residence interior, rendered in full fidelity, begins to lose vertical coherence — the walls smearing downward while both subjects remain perfectly sharp.</textarea>
+        <label class="flabel">Line spoken in scene</label>
+        <textarea id="fQuote" rows="2">"Nothing is wrong with it. You're just being sensitive."</textarea>
+        <label class="flabel">Mechanism</label>
+        <input type="text" id="fFallacy" value="Denial of reality / normalcy bias">
+        <label class="flabel">Framework</label>
+        <input type="text" id="fConcept" value="Cognitive dissonance (Festinger)">
+        <button class="btn" id="runScript" style="margin-top:14px">Write narration</button>
+        <button class="btn ghost" id="playScript" style="margin-top:14px;margin-left:8px;display:none">Play narration</button>
+        <div class="out" id="outScript"></div>
+      </div>
+
+      <div class="mod">
+        <h3>Fallacy Scanner <span class="tag live">LIVE</span></h3>
+        <p class="hint">Paste any deflection or excuse. Returns the mechanism being used and what it actually means.</p>
+        <label class="flabel">Statement</label>
+        <textarea id="scanIn" rows="4" placeholder="&quot;I lied so you wouldn't be mad at him. I did it to save you the heartache.&quot;"></textarea>
+        <button class="btn" id="runScan" style="margin-top:14px">Scan statement</button>
+        <div class="scanout" id="scanOut"></div>
+        <p class="hint" style="margin:14px 0 0">
+          Voice synthesis and volumetric render remain simulated — those require API keys held
+          on a server, not in a browser. Narration playback below uses the local speech engine.
+        </p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <span>O.B.L.I.V.I.O.N. — OFFICIAL BUREAU OF LOGICAL INCONSISTENCIES, VIOLATIONS &amp; INTERPERSONAL OBFUSCATION</span>
+  <span>ALL SUBJECTS FICTIONALIZED / NO IDENTIFYING DATA RETAINED</span>
+</footer>
+
+<script src="../assets/engine.bundle.js"></script>
+<script>
+/* ==========================================================================
+   O.B.L.I.V.I.O.N. — FORENSIC RECONSTRUCTION ENVIRONMENT
+   ========================================================================== */
+
+/* ┌────────────────────────────────────────────────────────────────────────┐
+   │  EDIT HERE — YOUTUBE LINKS                                             │
+   │                                                                        │
+   │  CHANNEL_URL : paste your full channel URL.                            │
+   │  youtubeId   : the 11-character code after "watch?v=" in a video URL.  │
+   │                e.g. youtube.com/watch?v=dQw4w9WgXcQ  ->  'dQw4w9WgXcQ' │
+   │                                                                        │
+   │  Leave youtubeId as '' and the card shows "NOT YET LINKED" —           │
+   │  the briefing stays visible, it just isn't clickable yet.              │
+   └────────────────────────────────────────────────────────────────────────┘ */
+
+const CHANNEL_URL = '';   // e.g. 'https://www.youtube.com/@yourchannel'
+
+const BRIEFINGS = [
+  {
+    youtubeId: '',
+    duration: '',
+    title: 'Manufactured Debt',
+    desc: 'How an unrequested favour becomes an invoice, and why refusing it gets read as theft.',
+    mechanism: 'TRANSACTIONAL COERCION'
+  },
+  {
+    youtubeId: '',
+    duration: '',
+    title: 'The DARVO Loop',
+    desc: 'Deny, attack, reverse victim and offender — the three-beat sequence that runs whenever accountability enters the room.',
+    mechanism: 'ACCOUNTABILITY EVASION'
+  },
+  {
+    youtubeId: '',
+    duration: '',
+    title: 'Literalism as a Weapon',
+    desc: 'Substituting the transcript for the event. The words were benign; the room was not. Only one gets admitted as evidence.',
+    mechanism: 'EPISTEMIC CONTROL'
+  },
+  {
+    youtubeId: '',
+    duration: '',
+    title: 'Weaponised Nuance',
+    desc: 'When the facts are indefensible, demand more context. Complexity that only ever flows toward inaction is not analysis.',
+    mechanism: 'AVOIDANCE VIA COMPLEXITY'
+  },
+  {
+    youtubeId: '',
+    duration: '',
+    title: 'The Pattern Interrupt',
+    desc: 'Ending a serious conversation with a trivial request, so the unresolved issue is declared closed without anyone conceding anything.',
+    mechanism: 'CONFLICT DEBT'
+  },
+  {
+    youtubeId: '',
+    duration: '',
+    title: 'Reactive Defence',
+    desc: 'Why the person keeping an accurate account ends up looking like the unstable one — and how that inversion is engineered.',
+    mechanism: 'NARRATIVE INVERSION'
+  }
+];
+
+
+const state = {
+  env: 'residence',
+  distortion: 0,      // 0..100 manual floor
+  audioDrive: 0,      // 0..100 driven by playback
+  playingId: null
+};
+function totalDistortion(){ return Math.min(100, Math.max(state.distortion, state.audioDrive)); }
+
+/* ---------------- ENVIRONMENTS ---------------- */
+const ENVIRONMENTS = {
+  residence: { label:'RESIDENCE / INTERIOR', note:'Primary dwelling. Most incidents reconstructed here.' },
+  resort:    { label:'RESORT / EXTERIOR',    note:'Remote location. Site of the broadcast betrayal.' },
+  vehicle:   { label:'VEHICLE / ENCLOSED',   note:'Confined volume. Escalation with no available exit.' }
+};
+
+/* ---------------- POINT CLOUD ---------------- */
+const canvas = document.getElementById('splat');
+const ctx = canvas.getContext('2d');
+let cloud = [], camAngle = 0, dpr = 1;
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function buildCloud(env){
+  const pts = [];
+  const rnd = (a,b)=> a + Math.random()*(b-a);
+
+  // floor plane
+  for(let i=0;i<900;i++) pts.push({x:rnd(-3,3), y:1.2, z:rnd(-3,3), t:0});
+  // back + side walls
+  for(let i=0;i<520;i++) pts.push({x:rnd(-3,3), y:rnd(-1.4,1.2), z:3, t:1});
+  for(let i=0;i<380;i++) pts.push({x:-3, y:rnd(-1.4,1.2), z:rnd(-3,3), t:1});
+  for(let i=0;i<380;i++) pts.push({x:3,  y:rnd(-1.4,1.2), z:rnd(-3,3), t:1});
+  // ceiling hint
+  for(let i=0;i<260;i++) pts.push({x:rnd(-3,3), y:-1.4, z:rnd(-3,3), t:2});
+
+  if(env === 'residence'){
+    for(let i=0;i<340;i++) pts.push({x:rnd(-1.9,.3), y:rnd(.35,1.2), z:rnd(.6,2.3), t:3}); // couch mass
+    for(let i=0;i<190;i++) pts.push({x:rnd(1.1,2.4), y:rnd(.2,1.2), z:rnd(-.5,.8), t:3});  // table
+    for(let i=0;i<130;i++) pts.push({x:rnd(-.4,.4), y:rnd(-.9,-.1), z:2.98, t:4});          // window
+  } else if(env === 'resort'){
+    for(let i=0;i<420;i++) pts.push({x:rnd(-2.6,2.6), y:rnd(1.05,1.2), z:rnd(-1.2,1.6), t:4}); // water
+    for(let i=0;i<150;i++) pts.push({x:rnd(-2.7,-1.6), y:rnd(-.6,1.1), z:rnd(1.4,2.6), t:3});
+    for(let i=0;i<150;i++) pts.push({x:rnd(1.6,2.7),  y:rnd(-.6,1.1), z:rnd(1.4,2.6), t:3});
+  } else {
+    for(let i=0;i<300;i++) pts.push({x:rnd(-1.5,1.5), y:rnd(.5,1.2), z:rnd(-2.2,-.6), t:3}); // seats
+    for(let i=0;i<220;i++) pts.push({x:rnd(-1.6,1.6), y:rnd(-1.1,.1), z:2.9, t:4});          // windshield
+    for(let i=0;i<160;i++) pts.push({x:rnd(-1.7,1.7), y:rnd(-1.2,1.2), z:rnd(-2.6,-2.2), t:1});
+  }
+
+  pts.forEach(p=>{ p.seed = Math.random(); });
+  return pts;
+}
+
+function resizeCanvas(){
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const r = canvas.getBoundingClientRect();
+  canvas.width = Math.max(1, Math.floor(r.width * dpr));
+  canvas.height = Math.max(1, Math.floor(r.height * dpr));
+}
+window.addEventListener('resize', resizeCanvas);
+
+function lerp(a,b,t){ return a + (b-a)*t; }
+
+function renderCloud(ts){
+  const d = totalDistortion() / 100;
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#0b0d10';
+  ctx.fillRect(0,0,w,h);
+
+  if(!reduceMotion) camAngle += 0.0016 + d*0.0022;
+  const cA = Math.cos(camAngle), sA = Math.sin(camAngle);
+  const cx = w/2, cy = h/2, focal = Math.min(w,h) * 0.85;
+  const time = ts * 0.001;
+
+  // colour endpoints: ice -> decay
+  const ice = [127,212,232], decay = [255,61,127];
+
+  for(let i=0;i<cloud.length;i++){
+    const p = cloud[i];
+
+    // points drop out as distortion climbs — data loss, not blur
+    if(d > 0.15 && p.seed < d * 0.45) continue;
+
+    let x = p.x, y = p.y, z = p.z;
+
+    // vertical melt: geometry smears downward, worst on walls/ceiling
+    if(d > 0){
+      const melt = d * d * (p.t === 0 ? 0.25 : 1.15);
+      y += melt * (0.4 + p.seed) * (1 + Math.sin(time*0.7 + p.seed*9) * 0.35);
+      const jit = d * 0.22 * (p.seed - 0.5);
+      x += jit * Math.sin(time*2.1 + p.seed*17);
+      z += jit * Math.cos(time*1.7 + p.seed*13);
+    }
+
+    // rotate about Y, project
+    const rx = x*cA - z*sA;
+    const rz = x*sA + z*cA + 5.6;
+    if(rz <= 0.25) continue;
+    const s = focal / rz;
+    const px = cx + rx * s;
+    const py = cy + y * s;
+    if(px < -40 || px > w+40 || py < -40 || py > h+40) continue;
+
+    // depth fade
+    const depth = Math.max(0, Math.min(1, (rz - 2.4) / 6));
+    let alpha = (1 - depth) * 0.85;
+
+    // colour shift toward magenta with distortion; some points flip early (glitch)
+    const flip = (p.seed < d * 0.7) ? 1 : d;
+    const r = Math.round(lerp(ice[0], decay[0], flip));
+    const g = Math.round(lerp(ice[1], decay[1], flip));
+    const b = Math.round(lerp(ice[2], decay[2], flip));
+
+    // horizontal tear bands at high distortion
+    let dx = 0;
+    if(d > 0.5){
+      const band = Math.sin(py * 0.02 + time * 3);
+      if(band > 0.82) dx = (Math.random()-0.5) * d * 90;
+    }
+
+    const size = Math.max(1, (1 - depth) * 2.1 * dpr);
+    ctx.fillStyle = 'rgba('+r+','+g+','+b+','+alpha.toFixed(3)+')';
+    ctx.fillRect(px + dx, py, size, size);
+  }
+
+  // scanline wash
+  ctx.fillStyle = 'rgba(0,0,0,0.16)';
+  for(let yy=0; yy<h; yy+=3*dpr) ctx.fillRect(0, yy, w, dpr);
+
+  requestAnimationFrame(renderCloud);
+}
+
+/* ---------------- SUBJECT RENDERS ---------------- */
+const SUBJECTS = [
+  {
+    id:'SUBJECT A', name:'The Provider',
+    desc:'Converts unrequested labour into relational credit, then redeems that credit against another person\'s boundaries. Experiences refusal as theft.',
+    meta:'MECHANISM <b>MANUFACTURED DEBT</b>'
+  },
+  {
+    id:'SUBJECT B', name:'The Editor',
+    desc:'Controls the record rather than the room. Adjusts what happened after it has happened, and treats the other party\'s memory as the unreliable component.',
+    meta:'MECHANISM <b>NARRATIVE REVISION</b>'
+  },
+  {
+    id:'SUBJECT C', name:'The Witness',
+    desc:'Retains an accurate account and is systematically re-classified as unstable for retaining it. Accuracy becomes the symptom.',
+    meta:'MECHANISM <b>REACTIVE DEFENCE</b>'
+  }
+];
+
+function drawBust(cv, seedOffset){
+  const c = cv.getContext('2d');
+  const w = cv.width, h = cv.height;
+  const pts = [];
+  const rnd = (a,b)=> a + Math.random()*(b-a);
+
+  // shoulders / torso
+  for(let i=0;i<420;i++){
+    const t = Math.random();
+    pts.push({ x: rnd(-1,1) * (0.55 + t*0.5), y: 0.35 + t*0.7, z: rnd(-.35,.35) });
+  }
+  // neck
+  for(let i=0;i<90;i++) pts.push({ x: rnd(-.16,.16), y: rnd(.1,.42), z: rnd(-.16,.16) });
+  // head shell — hollow: points only on the surface, and the face arc is omitted entirely
+  for(let i=0;i<620;i++){
+    const th = Math.random()*Math.PI*2;
+    const ph = Math.acos(2*Math.random()-1);
+    const sx = Math.sin(ph)*Math.cos(th), sy = Math.cos(ph), sz = Math.sin(ph)*Math.sin(th);
+    if(sz > 0.35 && sy > -0.65 && sy < 0.45) continue;   // face region removed
+    pts.push({ x: sx*0.34, y: -0.18 + sy*0.42, z: sz*0.34 });
+  }
+
+  let a = seedOffset;
+  function frame(){
+    const d = totalDistortion()/100;
+    c.fillStyle = '#0b0d10';
+    c.fillRect(0,0,w,h);
+    if(!reduceMotion) a += 0.004;
+    const ca = Math.cos(a), sa = Math.sin(a);
+    const focal = h * 1.35, cx = w/2, cy = h*0.62;
+    for(const p of pts){
+      if(d > 0.2 && Math.random() < d*0.3) continue;
+      let x = p.x, y = p.y;
+      if(d > 0) y += d*d*0.5*Math.random();
+      const rx = x*ca - p.z*sa;
+      const rz = x*sa + p.z*ca + 2.4;
+      const s = focal / rz;
+      const px = cx + rx*s, py = cy + (y-0.55)*s;
+      const r = Math.round(lerp(127,255,d)), g = Math.round(lerp(212,61,d)), b = Math.round(lerp(232,127,d));
+      c.fillStyle = 'rgba('+r+','+g+','+b+',0.7)';
+      c.fillRect(px, py, 1.6, 1.6);
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function renderSubjects(){
+  const wrap = document.getElementById('subjects');
+  wrap.innerHTML = '';
+  SUBJECTS.forEach((s,i)=>{
+    const cell = document.createElement('div');
+    cell.className = 'subj';
+    cell.innerHTML =
+      '<canvas class="subj-canvas" width="420" height="300"></canvas>' +
+      '<div class="subj-body">' +
+        '<div class="subj-id">'+s.id+'</div>' +
+        '<div class="subj-name">'+s.name+'</div>' +
+        '<div class="subj-desc">'+s.desc+'</div>' +
+        '<div class="subj-meta">'+s.meta+'</div>' +
+      '</div>';
+    wrap.appendChild(cell);
+    drawBust(cell.querySelector('canvas'), i*2.1);
+  });
+}
+
+/* ---------------- ARCHIVE ---------------- */
+const CLIPS = [
+  {
+    id:'c1', title:'Reality substitution — the literalism defence',
+    cw:'GASLIGHTING', src:'SYNTHETIC RECONSTRUCTION', dur:'0:14',
+    line:"What energy? I'm apologising to you. The words coming out of my mouth were: I just want to relax.",
+    note:'Subject substitutes the transcript for the event. The vocabulary was benign; the room was not. Only one of those is admitted as evidence.',
+    peak:72
+  },
+  {
+    id:'c2', title:'Debt redemption — the sacrifice ledger',
+    cw:'COERCIVE PRESSURE', src:'SYNTHETIC RECONSTRUCTION', dur:'0:11',
+    line:"Do you know how much I sacrifice? I hate them. I planted them anyway. For you.",
+    note:'An unrequested favour is presented as an outstanding balance. The boundary under discussion is repriced as ingratitude.',
+    peak:58
+  },
+  {
+    id:'c3', title:'Motive laundering — the protective lie',
+    cw:'DECEPTION', src:'SYNTHETIC RECONSTRUCTION', dur:'0:12',
+    line:"I lied so you wouldn't be mad at him. I did it to save you the heartache.",
+    note:'A kind-sounding motive is attached to a coordinated deception. The listener\'s anger is re-labelled as a failure to appreciate the protection.',
+    peak:64
+  },
+  {
+    id:'c4', title:'Autonomic collapse — post-disclosure',
+    cw:'PANIC RESPONSE / DISTRESSING', src:'SYNTHETIC RECONSTRUCTION', dur:'0:19',
+    line:"[respiratory distress — speech fragmenting — subject attempting to recite the timeline aloud to confirm it happened]",
+    note:'The point at which a person begins verifying their own memory out loud. This is the mechanism working as designed.',
+    peak:96
+  }
+];
+
+let uploads = [];
+let audioEl = null, actx = null, analyser = null, srcNode = null, rafWave = null;
+
+function renderClips(){
+  const list = document.getElementById('clipList');
+  list.innerHTML = '';
+  [...CLIPS, ...uploads].forEach(clip=>{
+    const row = document.createElement('div');
+    row.className = 'clip';
+    row.dataset.id = clip.id;
+    row.innerHTML =
+      '<button class="playbtn" aria-label="Play '+clip.title+'">▶</button>' +
+      '<div class="clip-main">' +
+        '<div class="clip-title">'+clip.title+'</div>' +
+        '<div class="clip-meta"><span class="cw">'+clip.cw+'</span> · <span class="src">'+clip.src+'</span> · '+clip.dur+'</div>' +
+      '</div>' +
+      '<div class="clip-wave">'+ '<i></i>'.repeat(28) +'</div>' +
+      (clip.line ? '<div class="transcript"><b>TRANSCRIPT</b>'+clip.line+
+        (clip.note ? '<br><br><span style="color:var(--dim)">'+clip.note+'</span>' : '')+'</div>' : '');
+    row.querySelector('.playbtn').addEventListener('click', ()=> toggleClip(clip, row));
+    list.appendChild(row);
+  });
+}
+
+function stopAll(){
+  if(audioEl){ audioEl.pause(); audioEl.currentTime = 0; }
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  if(rafWave) cancelAnimationFrame(rafWave);
+  document.querySelectorAll('.clip.playing').forEach(r=>{
+    r.classList.remove('playing');
+    r.querySelector('.playbtn').textContent = '▶';
+    r.querySelectorAll('.clip-wave i').forEach(b=> b.style.height='12%');
+  });
+  state.playingId = null;
+  state.audioDrive = 0;
+  syncUI();
+}
+
+function toggleClip(clip, row){
+  if(state.playingId === clip.id){ stopAll(); return; }
+  stopAll();
+  state.playingId = clip.id;
+  row.classList.add('playing');
+  row.querySelector('.playbtn').textContent = '■';
+  const bars = row.querySelectorAll('.clip-wave i');
+
+  if(clip.file){
+    playFile(clip, bars, row);
+  } else {
+    playSynthetic(clip, bars, row);
+  }
+}
+
+/* Uploaded audio: real waveform via Web Audio analyser */
+function playFile(clip, bars, row){
+  if(!audioEl){ audioEl = new Audio(); audioEl.crossOrigin = 'anonymous'; }
+  audioEl.src = clip.url;
+  try{
+    if(!actx){
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      srcNode = actx.createMediaElementSource(audioEl);
+      analyser = actx.createAnalyser();
+      analyser.fftSize = 64;
+      srcNode.connect(analyser);
+      analyser.connect(actx.destination);
+    }
+    if(actx.state === 'suspended') actx.resume();
+  }catch(e){ /* analyser unavailable — playback still works */ }
+
+  audioEl.play().catch(()=>{});
+  const data = analyser ? new Uint8Array(analyser.frequencyBinCount) : null;
+
+  (function tick(){
+    if(state.playingId !== clip.id) return;
+    let level = 0;
+    if(analyser && data){
+      analyser.getByteFrequencyData(data);
+      let sum = 0;
+      for(let i=0;i<data.length;i++) sum += data[i];
+      level = sum / data.length / 255;
+      bars.forEach((b,i)=>{
+        const v = data[Math.floor(i / bars.length * data.length)] / 255;
+        b.style.height = Math.max(12, v*100) + '%';
+      });
+    } else {
+      level = 0.4 + Math.random()*0.3;
+      bars.forEach(b=> b.style.height = (12 + Math.random()*80) + '%');
+    }
+    state.audioDrive = Math.round(level * 100);
+    syncUI();
+    rafWave = requestAnimationFrame(tick);
+  })();
+
+  audioEl.onended = ()=> stopAll();
+}
+
+/* Built-in examples: spoken via local speech engine, waveform simulated,
+   distortion ramps toward the clip's documented peak */
+function playSynthetic(clip, bars, row){
+  const text = clip.line.replace(/\[.*?\]/g, 'Recording contains non-verbal distress.');
+  const start = performance.now();
+  const DUR = 9000;
+
+  if('speechSynthesis' in window){
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.92; u.pitch = 0.9;
+    const vs = window.speechSynthesis.getVoices();
+    const en = vs.find(v=>/en/i.test(v.lang));
+    if(en) u.voice = en;
+    u.onend = ()=>{ if(state.playingId === clip.id) stopAll(); };
+    window.speechSynthesis.speak(u);
+  }
+
+  (function tick(now){
+    if(state.playingId !== clip.id) return;
+    const t = Math.min(1, (performance.now() - start) / DUR);
+    state.audioDrive = Math.round(clip.peak * (0.25 + 0.75 * t));
+    bars.forEach(b=> b.style.height = (12 + Math.random()*(20 + clip.peak*0.7)) + '%');
+    syncUI();
+    rafWave = requestAnimationFrame(tick);
+  })();
+}
+
+/* ---------------- UPLOADS ---------------- */
+function addFiles(files){
+  [...files].filter(f=>f.type.startsWith('audio/')).forEach((f,i)=>{
+    uploads.push({
+      id:'u'+Date.now()+i,
+      title:f.name.replace(/\.[^.]+$/,''),
+      cw:'UNREVIEWED', src:'YOUR UPLOAD — SESSION ONLY', dur:'—',
+      file:true, url:URL.createObjectURL(f),
+      line:null
+    });
+  });
+  renderClips();
+}
+document.getElementById('pickBtn').addEventListener('click', ()=> document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change', e=> addFiles(e.target.files));
+const drop = document.getElementById('drop');
+['dragenter','dragover'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev=> drop.addEventListener(ev, e=>{ e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e=> addFiles(e.dataTransfer.files));
+
+/* Gate */
+document.getElementById('gateBtn').addEventListener('click', ()=>{
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('archiveBody').style.display = 'block';
+  renderClips();
+});
+document.getElementById('gateSkip').addEventListener('click', ()=>{
+  document.getElementById('analysis').scrollIntoView({behavior: reduceMotion ? 'auto' : 'smooth'});
+});
+
+/* ---------------- UI SYNC ---------------- */
+function syncUI(){
+  const d = totalDistortion();
+  const integ = 100 - d;
+  document.getElementById('vpInteg').textContent = integ;
+  document.getElementById('vpInteg').classList.toggle('hot', d > 45);
+  document.getElementById('statDist').innerHTML = 'DISTORTION <b>'+d+'%</b>';
+  document.getElementById('vpPts').innerHTML = 'POINTS <b>'+
+    Math.round(cloud.length * (1 - d/100*0.45)).toLocaleString()+'</b>';
+
+  let label = 'STABLE';
+  if(d > 80) label = 'RECORD UNRECOVERABLE';
+  else if(d > 55) label = 'GEOMETRY FAILING';
+  else if(d > 25) label = 'COHERENCE LOSS';
+  else if(d > 8)  label = 'DRIFT DETECTED';
+  document.getElementById('vpState').innerHTML = 'STATE <b>'+label+'</b>';
+
+  const dv = document.getElementById('distVal');
+  dv.textContent = state.distortion + '% — ' + (
+    state.distortion > 80 ? 'the account no longer survives contact' :
+    state.distortion > 55 ? 'structure gone, subjects still sharp' :
+    state.distortion > 25 ? 'edges disagree with each other' :
+    state.distortion > 8  ? 'small revisions accumulating' :
+                            'reality holding'
+  );
+
+  const env = ENVIRONMENTS[state.env];
+  document.getElementById('readout').innerHTML =
+    '<span>' + env.note + '</span><br><br>' +
+    'RENDERED &nbsp;<span>' + cloud.length.toLocaleString() + ' pts</span><br>' +
+    'RETAINED &nbsp;<span>' + Math.round(cloud.length*(1-d/100*0.45)).toLocaleString() + ' pts</span><br>' +
+    'DISCARDED <span style="color:var(--decay)">' + Math.round(cloud.length*(d/100*0.45)).toLocaleString() + ' pts</span>';
+}
+
+/* Environment buttons */
+function renderEnvBtns(){
+  const wrap = document.getElementById('envBtns');
+  wrap.innerHTML = '';
+  Object.entries(ENVIRONMENTS).forEach(([key,e])=>{
+    const b = document.createElement('button');
+    b.className = 'envbtn' + (key===state.env ? ' on' : '');
+    b.textContent = e.label;
+    b.addEventListener('click', ()=>{
+      state.env = key;
+      cloud = buildCloud(key);
+      document.getElementById('vpEnv').textContent = e.label;
+      document.getElementById('statEnv').innerHTML = 'ENV <b>'+key.toUpperCase()+'</b>';
+      renderEnvBtns(); syncUI();
+    });
+    wrap.appendChild(b);
+  });
+}
+
+document.getElementById('distSlider').addEventListener('input', e=>{
+  state.distortion = parseInt(e.target.value);
+  syncUI();
+});
+
+/* ---------------- CLAUDE MODULES ---------------- */
+/* ---------------- LOCAL ANALYSIS ENGINE ----------------
+   Replaces the original browser-side calls to api.anthropic.com. Those
+   shipped with no API key, so every "LIVE" module returned 401 for every
+   visitor — and putting a key in client-side JavaScript would publish it
+   to anyone who views source. Both modules now run on the site's own
+   analyzer: no key, no network, no data leaving the page. ---------------- */
+function engineReady(){ return typeof window.DecoderEngine !== 'undefined'; }
+
+/* Logic scanner: name the tactic, translate it into plain English. */
+function localScan(input){
+  if(!engineReady()) return { name:'ENGINE NOT LOADED', text:'assets/engine.bundle.js failed to load.' };
+  const r = window.DecoderEngine.analyze(input);
+  if(!r.hits.length){
+    return {
+      name: 'NO CATALOGUED PATTERN',
+      text: 'Nothing in the library matched this phrasing. That is not a verdict that the line was fine — '
+          + 'it means these particular documented patterns were not present in the words themselves.'
+    };
+  }
+  const t = r.tacticsById[r.hits[0].tacticId];
+  return {
+    name: t.label.toUpperCase(),
+    text: t.mechanism.split('. ')[0] + '.  [' + t.lineage + ']'
+  };
+}
+
+/* Narrator V.O.: assembled deterministically from the matched tactic's
+   clinical description — flat, forensic, no LLM and no key required. */
+function localNarration(scene, quote, fallacy, concept){
+  if(!engineReady()) return 'Engine not loaded.';
+  const r = window.DecoderEngine.analyze(quote || scene || '');
+  const t = r.hits.length ? r.tacticsById[r.hits[0].tacticId] : null;
+  const named = t ? t.label.toLowerCase() : (fallacy || 'the pattern in question').toLowerCase();
+  const mech = t ? t.mechanism.split('. ').slice(0, 2).join('. ') + '.'
+                 : 'The stated reason and the observable effect point in different directions.';
+  const src = t ? t.lineage.split(';')[0].trim() : (concept || '');
+  const closing = t && t.severity >= 3
+    ? 'Under sustained repetition this stops functioning as an argument and begins functioning as a constraint.'
+    : 'Isolated, it reads as friction. Repeated, it becomes the shape of the relationship.';
+  return 'Observed: ' + named + '. ' + mech + ' ' + closing + (src ? ' (' + src + ')' : '');
+}
+
+let lastNarration = '';
+document.getElementById('runScript').addEventListener('click', async ()=>{
+  const btn = document.getElementById('runScript');
+  const out = document.getElementById('outScript');
+  btn.disabled = true; btn.textContent = 'Writing…';
+  out.className = 'out'; out.innerHTML = '<span class="caret"></span>';
+  try{
+    lastNarration = localNarration(
+      document.getElementById('fScene').value,
+      document.getElementById('fQuote').value,
+      document.getElementById('fFallacy').value,
+      document.getElementById('fConcept').value);
+    out.textContent = lastNarration;
+    document.getElementById('playScript').style.display = 'inline-block';
+  }catch(e){
+    out.className = 'out err';
+    out.textContent = 'Narration did not generate. Reload the page and try again.';
+  }finally{
+    btn.disabled = false; btn.textContent = 'Write narration';
+  }
+});
+
+document.getElementById('playScript').addEventListener('click', ()=>{
+  if(!lastNarration || !('speechSynthesis' in window)) return;
+  stopAll();
+  const u = new SpeechSynthesisUtterance(lastNarration);
+  u.rate = 0.92; u.pitch = 0.9;
+  const vs = window.speechSynthesis.getVoices();
+  const en = vs.find(v=>/en/i.test(v.lang));
+  if(en) u.voice = en;
+  window.speechSynthesis.speak(u);
+});
+
+document.getElementById('runScan').addEventListener('click', async ()=>{
+  const val = document.getElementById('scanIn').value.trim();
+  const out = document.getElementById('scanOut');
+  if(!val){ out.innerHTML = '<b>NO INPUT</b>Paste a statement to scan.'; return; }
+  const btn = document.getElementById('runScan');
+  btn.disabled = true; btn.textContent = 'Scanning…';
+  out.innerHTML = '<span class="caret"></span>';
+  try{
+    /* The scanner reads the pasted statement, not the scene fields. */
+    const res = localScan(val);
+    out.innerHTML = '<b>' + res.name + '</b>' + res.text;
+  }catch(e){
+    out.innerHTML = '<b>SCAN FAILED</b>The scanner did not respond. Try again.';
+  }finally{
+    btn.disabled = false; btn.textContent = 'Scan statement';
+  }
+});
+
+/* ---------------- BRIEFINGS ---------------- */
+function renderBriefings(){
+  const wrap = document.getElementById('briefs');
+  wrap.innerHTML = '';
+
+  BRIEFINGS.forEach((b, i)=>{
+    const num = String(i+1).padStart(2,'0');
+    const cell = document.createElement('div');
+    cell.className = 'brief';
+
+    const linked = !!b.youtubeId;
+    const thumb = document.createElement('button');
+    thumb.className = 'brief-thumb';
+    thumb.setAttribute('aria-label', linked ? 'Play briefing '+num+': '+b.title : b.title+' — not yet linked');
+    if(!linked) thumb.disabled = true;
+
+    if(linked){
+      thumb.innerHTML =
+        '<img loading="lazy" alt="" src="https://i.ytimg.com/vi/'+b.youtubeId+'/hqdefault.jpg">' +
+        '<span class="brief-play"><span>▶</span></span>' +
+        (b.duration ? '<span class="brief-dur">'+b.duration+'</span>' : '');
+      // Facade: the YouTube iframe only loads once someone chooses to watch,
+      // so no third-party requests fire on page load.
+      thumb.addEventListener('click', ()=>{
+        stopAll();
+        const frame = document.createElement('iframe');
+        frame.src = 'https://www.youtube-nocookie.com/embed/'+b.youtubeId+'?autoplay=1&rel=0';
+        frame.title = b.title;
+        frame.allow = 'accelerometer; autoplay; encrypted-media; picture-in-picture';
+        frame.allowFullscreen = true;
+        thumb.replaceWith(frame);
+      });
+    } else {
+      thumb.innerHTML =
+        '<canvas width="320" height="180"></canvas>' +
+        '<span class="brief-unlinked">NOT YET LINKED</span>';
+    }
+
+    const body = document.createElement('div');
+    body.className = 'brief-body';
+    body.innerHTML =
+      '<div class="brief-num">BRIEFING '+num+'</div>' +
+      '<div class="brief-title">'+b.title+'</div>' +
+      '<div class="brief-desc">'+b.desc+'</div>' +
+      '<div class="brief-mech">MECHANISM <b>'+b.mechanism+'</b></div>';
+
+    cell.appendChild(thumb);
+    cell.appendChild(body);
+    wrap.appendChild(cell);
+
+    // unlinked cards get a still point-field so the grid never looks broken
+    if(!linked) drawStillField(thumb.querySelector('canvas'), i);
+  });
+
+  const cta = document.getElementById('channelCta');
+  if(CHANNEL_URL){
+    cta.innerHTML =
+      '<p>Full series, plus recordings that did not fit the case file.</p>' +
+      '<a class="btn" style="text-decoration:none;display:inline-block" href="'+CHANNEL_URL+
+      '" target="_blank" rel="noopener">Open the channel</a>';
+  } else {
+    cta.innerHTML =
+      '<p>Channel link not set. Open this file in a text editor and fill in ' +
+      '<span style="color:var(--ice)">CHANNEL_URL</span> and each ' +
+      '<span style="color:var(--ice)">youtubeId</span> at the top of the script. ' +
+      'Cards go live the moment an ID is present.</p>';
+  }
+}
+
+/* Static point field for unlinked briefing slots */
+function drawStillField(cv, seed){
+  if(!cv) return;
+  const c = cv.getContext('2d');
+  c.fillStyle = '#0b0d10';
+  c.fillRect(0,0,cv.width,cv.height);
+  let s = seed*9973 + 17;
+  const rnd = ()=>{ s = (s*16807) % 2147483647; return s / 2147483647; };
+  for(let i=0;i<420;i++){
+    const x = rnd()*cv.width;
+    const y = cv.height*0.45 + (rnd()-0.5)*cv.height*0.8;
+    c.fillStyle = 'rgba(127,212,232,'+(0.08 + rnd()*0.22).toFixed(2)+')';
+    c.fillRect(x, y, 1.4, 1.4);
+  }
+}
+
+/* ---------------- BOOT ---------------- */
+cloud = buildCloud(state.env);
+resizeCanvas();
+renderEnvBtns();
+renderSubjects();
+renderBriefings();
+syncUI();
+requestAnimationFrame(renderCloud);
+if('speechSynthesis' in window) window.speechSynthesis.getVoices();
+</script>
+<script src="../assets/js/upload.js"></script>
+<script>
+window.addEventListener("DOMContentLoaded", function () {
+  var host = document.getElementById("uploaderEvidence");
+  if (host && window.mountUploader) {
+    mountUploader(host, {
+      label: "Add evidence · audio, video, images, transcripts",
+      onText: function (text) {
+        var scan = document.getElementById("scanIn");
+        if (scan) { scan.value = text.slice(0, 4000); document.getElementById("runScan").click(); }
+      },
+    });
+  }
+});
+</script>
+</body>
+</html>

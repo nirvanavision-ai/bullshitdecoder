@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Gaslight Protocols — Production Console</title>
+<style>
+  :root{
+    --void:#07090a; --panel:#0d1210; --line:#1c2b23;
+    --green:#4dffa0; --greendim:#2f8f66;
+    --blood:#c1121f; --violet:#8d5bd4; --amber:#e6b45a;
+    --bone:#d8ded7; --mute:#6f7d76;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0px, rgba(0,0,0,.18) 1px, transparent 1px, transparent 3px),
+      radial-gradient(ellipse 100% 60% at 50% 0%, rgba(77,255,160,.06), transparent 60%),
+      var(--void);
+    color:var(--bone);
+    font-family:"Courier New",monospace;
+    min-height:100%;
+    padding-bottom:60px;
+  }
+  ::selection{background:var(--green);color:#04120a}
+
+  header{
+    padding:22px 24px 18px;
+    border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;
+    background:linear-gradient(rgba(77,255,160,.03),transparent);
+  }
+  .logo{color:var(--blood);font-size:clamp(20px,3.4vw,30px);font-weight:bold;letter-spacing:.06em;
+    text-shadow:0 0 14px rgba(193,18,31,.4);}
+  .logo span{color:var(--green);text-shadow:0 0 14px rgba(77,255,160,.4)}
+  .caseref{font-size:11px;letter-spacing:.25em;color:var(--mute)}
+  .sysstatus{display:flex;gap:16px;font-size:11px;letter-spacing:.12em;color:var(--mute)}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px}
+  .dot.live{background:var(--green);box-shadow:0 0 8px var(--green)}
+  .dot.mock{background:var(--amber);box-shadow:0 0 6px var(--amber)}
+
+  main{max-width:1080px;margin:0 auto;padding:28px 20px}
+
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+  .tab{
+    background:var(--panel);border:1px solid var(--line);color:var(--mute);
+    padding:9px 16px;font-family:inherit;font-size:12px;letter-spacing:.1em;cursor:pointer;
+  }
+  .tab:hover{color:var(--bone);border-color:var(--greendim)}
+  .tab.active{color:var(--green);border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+
+  .card{
+    background:var(--panel);border:1px solid var(--line);
+    padding:20px 22px;margin-bottom:18px;
+  }
+  .card h2{
+    font-size:12px;letter-spacing:.28em;color:var(--green);margin-bottom:16px;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .chip{font-size:9px;letter-spacing:.18em;padding:3px 8px;border:1px solid currentColor}
+  .chip.live{color:var(--green)}
+  .chip.mock{color:var(--amber)}
+
+  label{display:block;font-size:10px;letter-spacing:.18em;color:var(--mute);margin:14px 0 6px}
+  label:first-of-type{margin-top:0}
+  textarea,input[type=text]{
+    width:100%;background:#040604;border:1px solid var(--line);color:var(--bone);
+    font-family:inherit;font-size:13.5px;line-height:1.55;padding:10px 12px;resize:vertical;
+  }
+  textarea:focus,input:focus{outline:none;border-color:var(--green)}
+  textarea.small{min-height:52px}
+  textarea.big{min-height:80px}
+
+  .pipeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:6px}
+  .stage{border:1px solid var(--line);background:#0a0e0b;padding:16px}
+  .stage h3{font-size:11px;letter-spacing:.2em;color:var(--bone);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
+  .stage .desc{font-size:11px;color:var(--mute);margin-bottom:12px;line-height:1.5}
+  .runbtn{
+    width:100%;background:none;border:1px solid var(--greendim);color:var(--green);
+    font-family:inherit;font-size:11px;letter-spacing:.18em;padding:9px;cursor:pointer;
+  }
+  .runbtn:hover{background:rgba(77,255,160,.08);border-color:var(--green)}
+  .runbtn:disabled{opacity:.4;cursor:wait}
+  .output{
+    margin-top:12px;font-size:12.5px;line-height:1.6;color:var(--green);
+    min-height:20px;white-space:pre-wrap;
+  }
+  .output .cursor{display:inline-block;width:7px;height:13px;background:var(--green);animation:blink 1s steps(1) infinite;vertical-align:-2px}
+  @keyframes blink{50%{opacity:0}}
+  .waveform{display:flex;gap:2px;align-items:flex-end;height:32px;margin-top:10px}
+  .waveform span{flex:1;background:var(--amber);opacity:.7}
+  .frame{
+    margin-top:10px;height:100px;border:1px dashed var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--mute);
+    background:
+      repeating-linear-gradient(45deg, rgba(230,180,90,.05) 0 6px, transparent 6px 12px);
+  }
+  .filename{font-size:10.5px;color:var(--mute);margin-top:8px;letter-spacing:.05em}
+
+  .exportbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:18px}
+  .primarybtn{
+    background:var(--green);color:#04120a;border:none;font-family:inherit;font-weight:bold;
+    font-size:12px;letter-spacing:.16em;padding:12px 22px;cursor:pointer;
+  }
+  .primarybtn:hover{background:#7fffbf}
+  .primarybtn:disabled{opacity:.4;cursor:not-allowed}
+  .ghostbtn{
+    background:none;border:1px solid var(--line);color:var(--mute);
+    font-family:inherit;font-size:11px;letter-spacing:.14em;padding:11px 18px;cursor:pointer;
+  }
+  .ghostbtn:hover{color:var(--bone);border-color:var(--bone)}
+  .publishnote{font-size:11px;color:var(--mute);line-height:1.6;max-width:520px}
+
+  .scannercard textarea{min-height:70px}
+  .scanresult{
+    margin-top:14px;border-left:3px solid var(--violet);padding:10px 14px;
+    background:rgba(141,91,212,.06);font-size:13px;line-height:1.6;color:#cdb9ef;min-height:18px;
+  }
+  .scanresult .ftag{color:var(--violet);letter-spacing:.2em;font-size:10px;display:block;margin-bottom:5px}
+
+  .errtext{color:#ff6b6b;font-size:11.5px;margin-top:8px}
+
+  /* ---- Audio preview library ---- */
+  select{
+    width:100%;background:#040604;border:1px solid var(--line);color:var(--bone);
+    font-family:inherit;font-size:12.5px;padding:9px 10px;
+  }
+  select:focus{outline:none;border-color:var(--green)}
+  input[type=range]{width:100%;accent-color:var(--green);margin-top:4px}
+  .voicerow{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:4px}
+  @media (max-width:560px){.voicerow{grid-template-columns:1fr}}
+  .examplerow{
+    display:flex;align-items:center;gap:14px;
+    border:1px solid var(--line);padding:10px 14px;background:#0a0e0b;
+  }
+  .exrow-btn{
+    flex:0 0 auto;width:34px;height:34px;border:1px solid var(--greendim);background:none;
+    color:var(--green);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;
+  }
+  .exrow-btn:hover{background:rgba(77,255,160,.08);border-color:var(--green)}
+  .exrow-btn.playing{background:var(--green);color:#04120a}
+  .exrow-text{flex:1;min-width:0}
+  .exrow-label{font-size:10.5px;letter-spacing:.14em;color:var(--mute);margin-bottom:3px}
+  .exrow-quote{font-size:12.5px;color:var(--bone);line-height:1.5}
+  .exrow-bars{display:flex;gap:2px;align-items:flex-end;height:20px;width:44px;flex:0 0 auto;opacity:.3}
+  .exrow-bars span{flex:1;background:var(--green);height:20%}
+  .exrow-bars.active{opacity:1}
+  @keyframes barpulse{0%,100%{height:20%}50%{height:95%}}
+  .exrow-bars.active span{animation:barpulse .55s ease-in-out infinite}
+  .waveform.active span{animation:barpulse .5s ease-in-out infinite}
+  .playbtn-inline{
+    margin-top:10px;background:none;border:1px solid var(--greendim);color:var(--green);
+    font-family:inherit;font-size:10.5px;letter-spacing:.12em;padding:7px 14px;cursor:pointer;
+  }
+  .playbtn-inline:hover{background:rgba(77,255,160,.08);border-color:var(--green)}
+  .playbtn-inline.playing{background:var(--green);color:#04120a}
+
+  footer{
+    max-width:1080px;margin:0 auto;padding:20px;text-align:right;
+    font-size:10px;letter-spacing:.2em;color:var(--mute);
+  }
+</style>
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%236ee7c0%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-family=%27system-ui%27 font-size=%2720%27 font-weight=%27700%27 text-anchor=%27middle%27 fill=%27%2308201a%27%3ED%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<nav class="sitenav">
+  <a class="brand" href="../">THE BULLSHIT DECODER</a>
+  <div class="navlinks">
+    <a href="../decoder/">Decoder</a>
+    <a href="../oblivion/">O.B.L.I.V.I.O.N.</a>
+    <a href="../gaslight/" aria-current="page">Gaslight Protocols</a>
+  </div>
+  <span class="navtag">local analysis · nothing uploaded</span>
+</nav>
+
+
+<header>
+  <div>
+    <div class="logo">THE GASLIGHT <span>PROTOCOLS</span></div>
+    <div class="caseref">ARGUMENT AUTOPSY PIPELINE // CASE_REF: 420-EGG</div>
+  </div>
+  <div class="sysstatus">
+    <span><span class="dot live"></span>ANALYSIS ENGINE — LOCAL, NO NETWORK</span>
+    <span><span class="dot mock"></span>VOICE SYNTH (ELEVENLABS) — MOCKED</span>
+    <span><span class="dot mock"></span>DIGITAL TWIN (HEYGEN) — MOCKED</span>
+  </div>
+</header>
+
+<main>
+
+  <div class="tabs" id="tabs"></div>
+
+  <!-- AUDIO PREVIEW LIBRARY -->
+  <div class="card">
+    <h2>AUDIO PREVIEW LIBRARY <span class="chip mock">BROWSER TTS — STAND-IN FOR ELEVENLABS</span></h2>
+    <div class="desc" style="font-size:11px;color:var(--mute);margin-bottom:14px;line-height:1.6">
+      Real ElevenLabs keys aren't wired in yet, so these play through your browser's own speech engine —
+      a visitor can hear how each narrator line lands right now, no pipeline run required.
+    </div>
+    <div class="voicerow">
+      <div>
+        <label style="margin-top:0">Narrator Voice</label>
+        <select id="voiceSelect"></select>
+      </div>
+      <div>
+        <label style="margin-top:0">Playback Speed <span id="rateVal" style="color:var(--green)">0.95x</span></label>
+        <input type="range" id="rateSlider" min="0.7" max="1.3" step="0.05" value="0.95">
+      </div>
+    </div>
+    <div id="exampleRows" style="margin-top:16px;display:flex;flex-direction:column;gap:10px"></div>
+  </div>
+
+  <!-- EPISODE INPUT -->
+  <div class="card">
+    <h2>EPISODE INPUT</h2>
+    <label>Scene Description</label>
+    <textarea id="fScene" class="big"></textarea>
+    <label>Quote (V.O.)</label>
+    <textarea id="fQuote" class="small"></textarea>
+    <label>Fallacy Detected</label>
+    <input type="text" id="fFallacy">
+    <label>Psychological / Strategic Concept</label>
+    <input type="text" id="fConcept">
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="card">
+    <h2>PRODUCTION PIPELINE</h2>
+    <div class="pipeline">
+
+      <div class="stage">
+        <h3>1 · SCRIPT DOCTOR <span class="chip live">LOCAL ENGINE</span></h3>
+        <div class="desc">Generates the deadpan clinical narrator V.O. from your scene, quote, and concept.</div>
+        <button class="runbtn" id="runScript">▶ Generate Narrator V.O.</button>
+        <div class="output" id="outScript"></div>
+        <button class="playbtn-inline" id="stage1Play" style="display:none">▶ Play This (Browser TTS)</button>
+      </div>
+
+      <div class="stage">
+        <h3>2 · VOICE SYNTH <span class="chip mock">MOCKED — ELEVENLABS</span></h3>
+        <div class="desc">Renders the narrator V.O. as audio. Connect an ElevenLabs key server-side to make this live.</div>
+        <button class="runbtn" id="runVoice" disabled>▶ Synthesize Voice</button>
+        <div class="waveform" id="waveform" style="display:none"></div>
+        <div class="filename" id="voiceFile"></div>
+        <button class="playbtn-inline" id="stage2Play" style="display:none">▶ Play (Browser TTS)</button>
+      </div>
+
+      <div class="stage">
+        <h3>3 · DIGITAL TWIN RENDER <span class="chip mock">MOCKED — HEYGEN</span></h3>
+        <div class="desc">Renders the needle-felted claymation overlay. Connect a HeyGen key server-side to make this live.</div>
+        <button class="runbtn" id="runVideo" disabled>▶ Render Claymation Overlay</button>
+        <div class="frame" id="videoFrame" style="display:none">[ mock render preview ]</div>
+        <div class="filename" id="videoFile"></div>
+      </div>
+
+    </div>
+
+    <div class="exportbar">
+      <button class="primarybtn" id="exportBtn" disabled>⬇ EXPORT EPISODE PACKAGE</button>
+      <span class="publishnote">No publish destination was specified, so this bundles the script, mock voice, and mock render into one manifest you can hand to whichever platform (TikTok, Reels, YouTube Shorts) once real keys are wired in.</span>
+    </div>
+  </div>
+
+  <!-- LOGIC SCANNER -->
+  <div class="card scannercard">
+    <h2>THE LOGIC SCANNER <span class="chip live">LOCAL ENGINE</span></h2>
+    <div class="desc" style="font-size:11px;color:var(--mute);margin-bottom:10px">
+      Drop in any excuse or deflection. It comes back with the fallacy name and the plain-English translation.
+    </div>
+    <textarea id="fallacyInput" placeholder="e.g. &quot;You know how much I sacrifice? I hate eggplants but I planted them for you.&quot;"></textarea>
+    <button class="runbtn" id="runScan" style="margin-top:10px;width:auto;padding:9px 20px">▶ Scan for Fallacy</button>
+    <div class="scanresult" id="scanResult"></div>
+    <div id="uploaderScan"></div>
+  </div>
+
+</main>
+
+<footer>CONFIDENTIAL // NO DATA LEAK DETECTED // ENCRYPTION ACTIVE</footer>
+
+<script src="../assets/engine.bundle.js"></script>
+<script>
+/* ============================================================
+   THE GASLIGHT PROTOCOLS — PRODUCTION CONSOLE
+   Script Doctor (Claude) is fully wired via the Anthropic API.
+   Voice Synth (ElevenLabs) and Digital Twin (HeyGen) are mocked
+   pending real API keys — swap MOCK functions for live fetch
+   calls once those are available server-side.
+   ============================================================ */
+
+const EPISODES = {
+  ep1: {
+    label:'EP 01 · "NOTHING IS WRONG"',
+    scene:'A needle-felted claymation teenager is standing calmly while a plush figure pours a bucket of glitter-gasoline onto a small campfire beside him, wearing a comically oversized blindfold.',
+    quote:'"Nothing is wrong with it. You\'re just being sensitive."',
+    fallacy:'Denial of Reality / Normalcy Bias',
+    concept:'Cognitive Dissonance Theory (Leon Festinger)'
+  },
+  ep2: {
+    label:'EP 02 · "COOL GUY" INFILTRATION',
+    scene:'A deflated felt puppet holds a tiny intricate prop in one hand and something faintly ominous in the other, offering both to a smaller puppet with theatrical casualness.',
+    quote:'"What do we say? First this, then that, then the next thing..."',
+    fallacy:'False Equivalence / Halo Effect Bypass',
+    concept:'Weapons of Influence (Robert Cialdini)'
+  },
+  ep3: {
+    label:'EP 03 · GHOST & BOAST',
+    scene:'Split screen. Top: a puppet looks innocently into the camera. Bottom: a glaring, neon-colored text message flashes on a giant screen, sent from somewhere the puppet swore it wasn\'t.',
+    quote:'"I have nothing to do with her. I\'ll call you tomorrow."',
+    fallacy:'Calculated Deception & Triangulation',
+    concept:'The Strategy of Conflict (Thomas Schelling)'
+  },
+  custom: { label:'+ CUSTOM EPISODE', scene:'', quote:'', fallacy:'', concept:'' }
+};
+
+let activeEp = 'ep1';
+let pipeline = { script:null, voice:null, video:null };
+
+/* ---------- Speech synthesis (browser TTS — stand-in for ElevenLabs) ---------- */
+let voices = [];
+let currentPlayingKey = null;
+
+function loadVoices(){
+  voices = ('speechSynthesis' in window) ? window.speechSynthesis.getVoices() : [];
+  const sel = document.getElementById('voiceSelect');
+  if(!sel) return;
+  const prevIdx = sel.value;
+  sel.innerHTML = '';
+  if(voices.length === 0){
+    const opt = document.createElement('option');
+    opt.textContent = 'Loading voices…';
+    sel.appendChild(opt);
+    return;
+  }
+  voices.forEach((v,i)=>{
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = v.name + ' (' + v.lang + ')';
+    sel.appendChild(opt);
+  });
+  const preferredEnglish = voices.findIndex(v => /en/i.test(v.lang));
+  sel.value = (prevIdx !== '' && voices[prevIdx]) ? prevIdx : (preferredEnglish >= 0 ? preferredEnglish : 0);
+}
+if('speechSynthesis' in window){
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function stopSpeech(){
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  document.querySelectorAll('.exrow-btn.playing').forEach(b=>{ b.classList.remove('playing'); b.textContent='▶'; });
+  document.querySelectorAll('.exrow-bars.active').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.playbtn-inline.playing').forEach(b=>{
+    b.classList.remove('playing'); b.textContent = b.dataset.idleLabel || '▶ Play';
+  });
+  const wf = document.getElementById('waveform');
+  if(wf) wf.classList.remove('active');
+  currentPlayingKey = null;
+}
+
+function playText(text, key, opts){
+  opts = opts || {};
+  if(!text) return;
+  if(!('speechSynthesis' in window)){
+    alert("This browser doesn't support speech synthesis — try Chrome, Edge, or Safari.");
+    return;
+  }
+  if(currentPlayingKey === key){ stopSpeech(); return; }
+  stopSpeech();
+  if(opts.btn) opts.btn.dataset.idleLabel = opts.idleLabel || opts.btn.textContent;
+  setTimeout(()=>{
+    const utter = new SpeechSynthesisUtterance(text);
+    const sel = document.getElementById('voiceSelect');
+    const idx = sel && sel.value !== '' ? parseInt(sel.value) : -1;
+    if(idx >= 0 && voices[idx]) utter.voice = voices[idx];
+    utter.rate = parseFloat(document.getElementById('rateSlider').value) || 0.95;
+    utter.pitch = 0.95;
+    utter.onstart = ()=>{
+      currentPlayingKey = key;
+      if(opts.btn){ opts.btn.classList.add('playing'); opts.btn.textContent = opts.playingLabel || '■'; }
+      if(opts.bars) opts.bars.classList.add('active');
+    };
+    utter.onend = utter.onerror = ()=>{
+      if(opts.btn){ opts.btn.classList.remove('playing'); opts.btn.textContent = opts.idleLabel || '▶'; }
+      if(opts.bars) opts.bars.classList.remove('active');
+      if(currentPlayingKey === key) currentPlayingKey = null;
+    };
+    window.speechSynthesis.speak(utter);
+  }, 60);
+}
+
+function renderExampleRows(){
+  const wrap = document.getElementById('exampleRows');
+  wrap.innerHTML = '';
+  ['ep1','ep2','ep3'].forEach(key=>{
+    const ep = EPISODES[key];
+    const row = document.createElement('div');
+    row.className = 'examplerow';
+    const btn = document.createElement('button');
+    btn.className = 'exrow-btn';
+    btn.textContent = '▶';
+    btn.setAttribute('aria-label', 'Play example audio for ' + ep.label);
+    const text = document.createElement('div');
+    text.className = 'exrow-text';
+    text.innerHTML = '<div class="exrow-label">'+ep.label+'</div><div class="exrow-quote">'+ep.quote+'</div>';
+    const bars = document.createElement('div');
+    bars.className = 'exrow-bars';
+    for(let i=0;i<5;i++){ bars.appendChild(document.createElement('span')); }
+    btn.addEventListener('click', ()=>
+      playText(ep.quote.replace(/^"|"$/g,''), 'ex-'+key, {btn, bars, idleLabel:'▶', playingLabel:'■'})
+    );
+    row.appendChild(btn); row.appendChild(text); row.appendChild(bars);
+    wrap.appendChild(row);
+  });
+}
+
+/* ---------- Tabs ---------- */
+function renderTabs(){
+  const wrap = document.getElementById('tabs');
+  wrap.innerHTML = '';
+  Object.entries(EPISODES).forEach(([key,ep])=>{
+    const b = document.createElement('button');
+    b.className = 'tab' + (key===activeEp ? ' active' : '');
+    b.textContent = ep.label;
+    b.addEventListener('click', ()=>{ saveCurrentFields(); activeEp = key; loadFields(); renderTabs(); resetPipeline(); });
+    wrap.appendChild(b);
+  });
+}
+function saveCurrentFields(){
+  const ep = EPISODES[activeEp];
+  ep.scene = document.getElementById('fScene').value;
+  ep.quote = document.getElementById('fQuote').value;
+  ep.fallacy = document.getElementById('fFallacy').value;
+  ep.concept = document.getElementById('fConcept').value;
+}
+function loadFields(){
+  const ep = EPISODES[activeEp];
+  document.getElementById('fScene').value = ep.scene;
+  document.getElementById('fQuote').value = ep.quote;
+  document.getElementById('fFallacy').value = ep.fallacy;
+  document.getElementById('fConcept').value = ep.concept;
+}
+function resetPipeline(){
+  pipeline = { script:null, voice:null, video:null };
+  stopSpeech();
+  document.getElementById('outScript').innerHTML='';
+  document.getElementById('waveform').style.display='none';
+  document.getElementById('voiceFile').textContent='';
+  document.getElementById('videoFrame').style.display='none';
+  document.getElementById('videoFile').textContent='';
+  document.getElementById('runVoice').disabled = true;
+  document.getElementById('runVideo').disabled = true;
+  document.getElementById('exportBtn').disabled = true;
+  document.getElementById('stage1Play').style.display = 'none';
+  document.getElementById('stage2Play').style.display = 'none';
+}
+document.getElementById('rateSlider').addEventListener('input', (e)=>{
+  document.getElementById('rateVal').textContent = parseFloat(e.target.value).toFixed(2) + 'x';
+});
+
+renderTabs(); loadFields(); renderExampleRows();
+
+/* ---------- Claude call helper ---------- */
+/* ---------------- LOCAL ANALYSIS ENGINE ----------------
+   Replaces the original browser-side calls to api.anthropic.com. Those
+   shipped with no API key, so every "LIVE" module returned 401 for every
+   visitor — and putting a key in client-side JavaScript would publish it
+   to anyone who views source. Both modules now run on the site's own
+   analyzer: no key, no network, no data leaving the page. ---------------- */
+function engineReady(){ return typeof window.DecoderEngine !== 'undefined'; }
+
+/* Logic scanner: name the tactic, translate it into plain English. */
+function localScan(input){
+  if(!engineReady()) return { name:'ENGINE NOT LOADED', text:'assets/engine.bundle.js failed to load.' };
+  const r = window.DecoderEngine.analyze(input);
+  if(!r.hits.length){
+    return {
+      name: 'NO CATALOGUED PATTERN',
+      text: 'Nothing in the library matched this phrasing. That is not a verdict that the line was fine — '
+          + 'it means these particular documented patterns were not present in the words themselves.'
+    };
+  }
+  const t = r.tacticsById[r.hits[0].tacticId];
+  return {
+    name: t.label.toUpperCase(),
+    text: t.mechanism.split('. ')[0] + '.  [' + t.lineage + ']'
+  };
+}
+
+/* Narrator V.O.: assembled deterministically from the matched tactic's
+   clinical description — flat, forensic, no LLM and no key required. */
+function localNarration(scene, quote, fallacy, concept){
+  if(!engineReady()) return 'Engine not loaded.';
+  const r = window.DecoderEngine.analyze(quote || scene || '');
+  const t = r.hits.length ? r.tacticsById[r.hits[0].tacticId] : null;
+  const named = t ? t.label.toLowerCase() : (fallacy || 'the pattern in question').toLowerCase();
+  const mech = t ? t.mechanism.split('. ').slice(0, 2).join('. ') + '.'
+                 : 'The stated reason and the observable effect point in different directions.';
+  const src = t ? t.lineage.split(';')[0].trim() : (concept || '');
+  const closing = t && t.severity >= 3
+    ? 'Under sustained repetition this stops functioning as an argument and begins functioning as a constraint.'
+    : 'Isolated, it reads as friction. Repeated, it becomes the shape of the relationship.';
+  return 'Observed: ' + named + '. ' + mech + ' ' + closing + (src ? ' (' + src + ')' : '');
+}
+
+/* ---------- Stage 1: Script Doctor (LIVE) ---------- */
+document.getElementById('runScript').addEventListener('click', async ()=>{
+  saveCurrentFields();
+  const ep = EPISODES[activeEp];
+  const btn = document.getElementById('runScript');
+  const out = document.getElementById('outScript');
+  btn.disabled = true; btn.textContent = '⏳ WRITING...';
+  out.innerHTML = '<span class="cursor"></span>';
+  try{
+    const sys = "You are the deadpan clinical narrator for a satirical, educational mini-series called The Gaslight Protocols. It exposes manipulation tactics and logical fallacies using needle-felted claymation puppets standing in for real people (never named). Your voiceover is 2-3 sentences, clinical and dry, forensic-report tone, zero sympathy and zero cruelty -- it should sound like a behavioral scientist narrating a nature documentary about a manipulation tactic. Never use real names. Output only the V.O. script, no preamble.";
+    const user = `Scene: ${ep.scene}\nQuote (V.O. in scene): ${ep.quote}\nFallacy Detected: ${ep.fallacy}\nConcept: ${ep.concept}\n\nWrite the narrator V.O. that plays under/after this scene.`;
+    const text = localNarration(ep.scene, ep.quote, ep.fallacy, ep.concept);
+    pipeline.script = text;
+    out.textContent = text;
+    document.getElementById('runVoice').disabled = false;
+    const playBtn1 = document.getElementById('stage1Play');
+    playBtn1.style.display = 'inline-block';
+    playBtn1.textContent = '▶ Play This (Browser TTS)';
+    playBtn1.onclick = ()=> playText(pipeline.script, 'stage1',
+      {btn:playBtn1, idleLabel:'▶ Play This (Browser TTS)', playingLabel:'■ Stop'});
+    checkExport();
+  }catch(e){
+    out.innerHTML = '<span class="errtext">Script generation failed. ' + (e.message||'') + '</span>';
+  }finally{
+    btn.disabled = false; btn.textContent = '▶ Generate Narrator V.O.';
+  }
+});
+
+/* ---------- Stage 2: Voice Synth (MOCK) ---------- */
+document.getElementById('runVoice').addEventListener('click', async ()=>{
+  const btn = document.getElementById('runVoice');
+  const wave = document.getElementById('waveform');
+  const fname = document.getElementById('voiceFile');
+  btn.disabled = true; btn.textContent = '⏳ SYNTHESIZING (MOCK)...';
+  wave.style.display = 'flex'; wave.innerHTML = '';
+  for(let i=0;i<40;i++){
+    const bar = document.createElement('span');
+    bar.style.height = (6 + Math.random()*26) + 'px';
+    wave.appendChild(bar);
+  }
+  await new Promise(r=>setTimeout(r, 1100));
+  pipeline.voice = { mock:true, file:'gaslight_'+activeEp+'_voice_v1.mp3' };
+  fname.textContent = '✓ ' + pipeline.voice.file + '  (mock — no audio bytes generated, connect ElevenLabs key to render)';
+  document.getElementById('runVideo').disabled = false;
+  btn.disabled = false; btn.textContent = '↻ Re-synthesize Voice';
+  const playBtn2 = document.getElementById('stage2Play');
+  playBtn2.style.display = 'inline-block';
+  playBtn2.textContent = '▶ Play (Browser TTS)';
+  playBtn2.onclick = ()=> playText(pipeline.script, 'stage2',
+    {btn:playBtn2, bars:wave, idleLabel:'▶ Play (Browser TTS)', playingLabel:'■ Stop'});
+  checkExport();
+});
+
+/* ---------- Stage 3: Digital Twin Render (MOCK) ---------- */
+document.getElementById('runVideo').addEventListener('click', async ()=>{
+  const btn = document.getElementById('runVideo');
+  const frame = document.getElementById('videoFrame');
+  const fname = document.getElementById('videoFile');
+  btn.disabled = true; btn.textContent = '⏳ RENDERING (MOCK)...';
+  frame.style.display = 'flex'; frame.textContent = '[ rendering... ]';
+  await new Promise(r=>setTimeout(r, 1400));
+  pipeline.video = { mock:true, file:'gaslight_'+activeEp+'_render_v1.mp4' };
+  frame.textContent = '[ mock render preview — ' + EPISODES[activeEp].label + ' ]';
+  fname.textContent = '✓ ' + pipeline.video.file + '  (mock — no video bytes generated, connect HeyGen key to render)';
+  btn.disabled = false; btn.textContent = '↻ Re-render Overlay';
+  checkExport();
+});
+
+function checkExport(){
+  document.getElementById('exportBtn').disabled = !(pipeline.script && pipeline.voice && pipeline.video);
+}
+
+/* ---------- Export Package ---------- */
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  saveCurrentFields();
+  const ep = EPISODES[activeEp];
+  const manifest = {
+    episode: ep.label,
+    scene: ep.scene,
+    quote: ep.quote,
+    fallacy_detected: ep.fallacy,
+    concept: ep.concept,
+    narrator_vo: pipeline.script,
+    voice_asset: pipeline.voice,
+    video_asset: pipeline.video,
+    publish_targets: [],
+    note: 'No publish destination specified. Voice and video assets are mocked placeholders -- wire ElevenLabs and HeyGen API keys server-side to generate real bytes before publishing.',
+    generated_at: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(manifest, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'gaslight_protocols_' + activeEp + '_package.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+/* ---------- Logic Scanner (LIVE) ---------- */
+document.getElementById('runScan').addEventListener('click', async ()=>{
+  const input = document.getElementById('fallacyInput').value.trim();
+  const result = document.getElementById('scanResult');
+  if(!input){ result.innerHTML = '<span class="errtext">Enter an excuse or deflection to scan.</span>'; return; }
+  const btn = document.getElementById('runScan');
+  btn.disabled = true; btn.textContent = '⏳ SCANNING...';
+  result.innerHTML = '<span class="cursor"></span>';
+  try{
+    const sys = "You are a logic-fallacy detector for an educational tool. Given a quoted excuse or deflection, identify the single most applicable logical fallacy or manipulation tactic by name, then give a one-sentence plain-English translation of what the speaker is actually doing. Format exactly as:\nFALLACY: <name>\nTRANSLATION: <one sentence>\nNo other text.";
+    const s2 = localScan(input); const text = 'FALLACY: '+s2.name+'\nTRANSLATION: '+s2.text;
+    const fallacyMatch = text.match(/FALLACY:\s*(.+)/i);
+    const translationMatch = text.match(/TRANSLATION:\s*(.+)/i);
+    result.innerHTML = '<span class="ftag">' + (fallacyMatch ? fallacyMatch[1].trim() : 'DETECTED') + '</span>' +
+      (translationMatch ? translationMatch[1].trim() : text);
+  }catch(e){
+    result.innerHTML = '<span class="errtext">Scan failed. ' + (e.message||'') + '</span>';
+  }finally{
+    btn.disabled = false; btn.textContent = '▶ Scan for Fallacy';
+  }
+});
+</script>
+<script src="../assets/js/upload.js"></script>
+<script>
+window.addEventListener("DOMContentLoaded", function () {
+  var host = document.getElementById("uploaderScan");
+  if (host && window.mountUploader) {
+    mountUploader(host, {
+      label: "Scan a file · or attach your own audio / video",
+      onText: function (text) {
+        document.getElementById("fallacyInput").value = text.slice(0, 4000);
+        document.getElementById("runScan").click();
+      },
+    });
+  }
+});
+</script>
+</body>
+</html>
