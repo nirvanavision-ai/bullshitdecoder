@@ -146,3 +146,70 @@ test("profile counts are accurate", () => {
   assert.equal(p.questionCount, 1);
   assert.equal(repairCount("I'm sorry. You're right. Thank you."), 3);
 });
+
+/* ---------- expanded library (v2) ---------- */
+
+test("boundary violation framed as innocence is detected", () => {
+  const r = analyze("I tried on your jewelry because I wanted to see how it looks on me");
+  assert.ok(r.hits.some(h => h.tacticId === "consent-bypass"), "should flag the consent bypass");
+  assert.ok(r.indices.boundary > 0, "boundary index should register");
+  assert.notEqual(r.read.band, "clear");
+});
+
+test("more boundary phrasings", () => {
+  for (const [t, id] of [
+    ["I read your journal, I didn't think you'd mind.", "consent-bypass"],
+    ["What's yours is mine, I shouldn't have to ask.", "entitlement"],
+    ["If you really loved me you'd have sex with me.", "sexual-coercion"],
+    ["I threw out your birth control.", "reproductive-coercion"],
+  ]) {
+    assert.ok(analyze(t).hits.some(h => h.tacticId === id), `${id} missed in: ${t}`);
+  }
+});
+
+test("non-apologies are flagged and do NOT count as repair", () => {
+  const r = analyze("I'm sorry you feel that way. I'm sorry if it upset you.");
+  assert.ok(r.hits.some(h => h.tacticId === "non-apology"));
+  assert.equal(r.profile.repairs, 0, "hollow apologies must not register as repair");
+});
+
+test("a genuine apology still counts as repair", () => {
+  const r = analyze("I'm sorry. You're right, that was my fault and I was wrong.");
+  assert.ok(r.profile.repairs >= 3);
+  assert.equal(r.read.band, "clear");
+});
+
+test("control, status, and labour classes fire", () => {
+  for (const [t, id] of [
+    ["It's my money and I'll cut you off.", "financial-control"],
+    ["I'll call immigration and you'll be deported.", "status-threat"],
+    ["Wait till everyone hears what you did.", "smear-campaign"],
+    ["You're just better at it than me, you'll redo it anyway.", "weaponized-incompetence"],
+    ["I'll talk to you when you're calm.", "tone-policing"],
+    ["That's still not good enough.", "moving-goalposts"],
+    ["You did that on purpose.", "mind-reading"],
+    ["God wants you to submit to your husband.", "spiritual-leverage"],
+    ["You can't even handle that on your own.", "infantilization"],
+    ["After all the times I covered for you.", "score-keeping"],
+    ["You're my soulmate, I can't live without you.", "love-bombing"],
+    ["Maybe I should just disappear.", "self-harm-leverage"],
+  ]) {
+    assert.ok(analyze(t).hits.some(h => h.tacticId === id), `${id} missed in: ${t}`);
+  }
+});
+
+test("self-harm leverage also raises the safety panel", () => {
+  assert.ok(analyze("If you leave, I'll kill myself.").safety.length > 0);
+});
+
+test("expanded library keeps ordinary messages clear (no false-positive drift)", () => {
+  for (const t of [
+    "I'm sorry I snapped earlier — you were right and I should have just said I was tired.",
+    "Can you grab milk on the way home? I'll cook.",
+    "I borrowed the charger from the kitchen, hope that's ok — put it back on your desk.",
+    "I love you and I'm really happy about this weekend.",
+  ]) {
+    const r = analyze(t);
+    assert.ok(["clear", "low"].includes(r.read.band), `false positive on "${t}" → ${r.read.band}`);
+  }
+});

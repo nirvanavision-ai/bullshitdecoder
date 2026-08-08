@@ -34,19 +34,41 @@ const bundle = [
   "})();",
 ].join("\n\n");
 
-const html = read("index.html")
-  .replace('<link rel="stylesheet" href="assets/css/decoder.css">',
-           () => `<style>\n${read("assets/css/decoder.css")}\n</style>`)
-  .replace('<script type="module" src="assets/js/ui/app.js"></script>',
-           () => `<script>\n${bundle}\n</script>`);
+/* The template lives in src/page.html — NOT at the repo root.
+   Reading index.html here made the build self-consuming: after the first run the
+   root file is already inlined, the <link>/<script> placeholders are gone, both
+   replacements silently no-op, and every later build re-emits the stale page
+   while still reporting success. That shipped once; the guards below exist so it
+   cannot ship twice. */
+const TEMPLATE = "src/page.html";
+const CSS_TAG = '<link rel="stylesheet" href="assets/css/decoder.css">';
+const JS_TAG = '<script type="module" src="assets/js/ui/app.js"></script>';
+
+const template = read(TEMPLATE);
+for (const [tag, name] of [[CSS_TAG, "stylesheet link"], [JS_TAG, "module script"]]) {
+  if (!template.includes(tag)) {
+    console.error(`✗ ${TEMPLATE} is missing its ${name} placeholder — nothing would be inlined.`);
+    process.exit(1);
+  }
+}
+
+const html = template
+  .replace(CSS_TAG, () => `<style>\n${read("assets/css/decoder.css")}\n</style>`)
+  .replace(JS_TAG, () => `<script>\n${bundle}\n</script>`);
 
 writeFileSync(join(ROOT, "index.html"), html);
 
-
-// Sanity check: catches the $-splice bug described above if it ever returns.
+// Guard 1: catches the $-splice bug (String.replace treats $$ / $& as patterns).
 const decls = (html.match(/const \$ = sel/g) || []).length;
 if (decls !== 1) {
   console.error(`✗ build corrupt: expected 1 '$' declaration, found ${decls}`);
+  process.exit(1);
+}
+// Guard 2: the output must actually carry the current engine, not a stale copy.
+const classes = (read("assets/js/engine/taxonomy.js").match(/^\s{4}id: "/gm) || []).length;
+const inlined = (html.match(/^\s{4}id: "/gm) || []).length;
+if (inlined !== classes) {
+  console.error(`✗ build stale: taxonomy has ${classes} classes but output has ${inlined}`);
   process.exit(1);
 }
 console.log(`✓ index.html — ${(html.length / 1024).toFixed(1)} KB, self-contained`);

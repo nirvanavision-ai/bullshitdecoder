@@ -31,6 +31,18 @@ const ABSOLUTES = ["always", "never", "everyone", "nobody", "no one", "everythin
 const HEDGES = ["maybe", "perhaps", "i think", "i feel", "it seems", "possibly", "might", "could be"];
 const REPAIR = ["i'm sorry", "im sorry", "i apologize", "you're right", "youre right", "i understand", "fair enough",
                 "that makes sense", "thank you", "i hear you", "my fault", "i was wrong"];
+/**
+ * Apology-shaped phrases that concede nothing. These must be subtracted from the
+ * repair count — otherwise "I'm sorry you feel that way" would *lower* a message's
+ * pressure score, letting the most common accountability dodge in the language
+ * quietly mask everything around it.
+ */
+const NON_APOLOGY = [
+  /i'?m sorry (?:that )?you (?:feel|felt|think|took|got)/gi,
+  /i'?m sorry (?:if|but)/gi,
+  /i apologi[sz]e (?:if|but)/gi,
+  /sorry (?:you were|if you were|that you were) (?:offended|upset|hurt)/gi,
+];
 const OBLIGATION_MODALS = /\b(?:you (?:should|must|have to|need to|better|ought to)|don'?t you dare)\b/gi;
 
 /**
@@ -67,7 +79,12 @@ export function hedgeCount(text) {
  */
 export function repairCount(text) {
   const lower = text.toLowerCase();
-  return REPAIR.reduce((n, r) => n + (lower.split(r).length - 1), 0);
+  const raw = REPAIR.reduce((n, r) => n + (lower.split(r).length - 1), 0);
+  const hollow = NON_APOLOGY.reduce((n, re) => {
+    re.lastIndex = 0;
+    return n + (text.match(re) || []).length;
+  }, 0);
+  return Math.max(0, raw - hollow);
 }
 
 export function obligationDensity(text) {

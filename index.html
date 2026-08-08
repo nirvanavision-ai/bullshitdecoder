@@ -428,6 +428,7 @@ const FAMILIES = {
   blame:      { label: "Blame transfer",     blurb: "Responsibility relocated from speaker to listener." },
   coercion:   { label: "Coercive pressure",  blurb: "Compliance extracted by attaching a cost to refusal." },
   obligation: { label: "Manufactured debt",  blurb: "Obligation created from past acts, then called in." },
+  boundary:   { label: "Boundary & consent", blurb: "Your limits, property, body, or privacy treated as negotiable." },
   escalation: { label: "Emotional escalation", blurb: "Contempt, absolutes, and intensity used as leverage." },
   rhetoric:   { label: "Argument distortion", blurb: "Logical structure bent so the point can't be reached." },
 };
@@ -776,6 +777,447 @@ const TAXONOMY = [
       "I need time to think rather than pick between two bad doors.",
     ],
   },
+
+  /* ==========================================================================
+     BOUNDARY & CONSENT
+     Violations that arrive without heat — narrated as curiosity, affection, or
+     practicality. These are the hardest to name in the moment precisely because
+     nothing in the sentence sounds hostile.
+     ========================================================================== */
+  {
+    id: "consent-bypass",
+    label: "Boundary violation framed as innocence",
+    family: "boundary",
+    severity: 2,
+    lineage: "Bancroft (2002) on entitlement; Herman (1992) on boundary erosion; Stark (2007) on micro-regulation.",
+    mechanism:
+      "A transgression is reported in the grammar of harmless curiosity: the act is stated plainly, the desire " +
+      "behind it is offered as sufficient justification, and your consent is never mentioned — because it was " +
+      "never treated as relevant. Nothing here sounds aggressive, which is exactly what makes it hard to name. " +
+      "The tell is structural: an action taken on your property, body, space, or information, plus a reason " +
+      "rooted entirely in the speaker's wants, minus any acknowledgement that permission was owed.",
+    patterns: [
+      /i (?:just |only )?(?:tried on|borrowed|took|used|wore|opened|moved|threw out|gave away) (?:your|his|her|their)\b[^.!?\n]*/gi,
+      /i (?:just |only )?(?:read|went through|looked (?:at|through)|checked|searched) (?:your|his|her|their)\b[^.!?\n]*/gi,
+      /because i wanted to\b[^.!?\n]*/gi,
+      /i didn'?t think you'?d (?:mind|care|notice|be upset)\b[^.!?\n]*/gi,
+      /i was (?:just |only )?curious\b[^.!?\n]*/gi,
+      /i (?:didn'?t|did not) (?:think|realize) (?:it|that) (?:was|would be) a (?:big )?(?:deal|problem)\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "Wanting to isn't the same as being allowed to. Ask me first next time.",
+      "My things aren't available by default. That's the boundary, regardless of intent.",
+      "I believe you didn't mean harm. I still need you to stop doing it.",
+    ],
+    note:
+      "Intent and impact are separate questions. A person can genuinely mean no harm and still have crossed a " +
+      "line — and 'I didn't mean anything by it' is an explanation, not permission granted after the fact.",
+  },
+  {
+    id: "entitlement",
+    label: "Entitlement claim",
+    family: "boundary",
+    severity: 2,
+    lineage: "Bancroft (2002), 'Why Does He Do That?' — entitlement as the engine beneath abusive behaviour.",
+    mechanism:
+      "Ownership of your possessions, time, body, or attention is asserted as simply true. There is no request " +
+      "because a request would imply you could decline.",
+    patterns: [
+      /what'?s yours is (?:mine|ours)\b[^.!?\n]*/gi,
+      /i don'?t (?:need|have to ask for) (?:your )?permission\b[^.!?\n]*/gi,
+      /i can do (?:what|whatever) i want\b[^.!?\n]*/gi,
+      /you don'?t (?:get to|have the right to) (?:tell me|decide)\b[^.!?\n]*/gi,
+      /(?:it'?s|its) not (?:really )?yours anyway\b[^.!?\n]*/gi,
+      /i shouldn'?t have to ask\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "It is mine, and the answer is no.",
+      "Asking isn't a formality — it's how I know this is consensual.",
+      "I'm not negotiating ownership of my own things.",
+    ],
+  },
+  {
+    id: "sexual-coercion",
+    label: "Sexual pressure",
+    family: "boundary",
+    severity: 3,
+    lineage: "Basile (1999) on sexual coercion in intimate relationships; WHO intimate-partner violence typology.",
+    mechanism:
+      "Consent is treated as an obstacle to be worn down rather than a condition to be met — through obligation, " +
+      "guilt, persistence, or the implication that refusal damages the relationship. Pressure that eventually " +
+      "produces a yes has not produced consent.",
+    patterns: [
+      /if you (?:really )?loved me,? you'?d (?:have sex|sleep with me|do it|let me)\b[^.!?\n]*/gi,
+      /you owe me (?:sex|this|that much)\b[^.!?\n]*/gi,
+      /(?:it'?s|its) your (?:duty|job|responsibility) as (?:my|a) (?:wife|husband|girlfriend|boyfriend|partner)\b[^.!?\n]*/gi,
+      /(?:i'?ll|i will) (?:get it|find it) (?:somewhere|from someone) else\b[^.!?\n]*/gi,
+      /you (?:never|always) (?:say no|reject me)\b[^.!?\n]*/gi,
+      /just this once,? (?:come on|please)\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "No is a complete answer. It doesn't need a reason.",
+      "Pressure doesn't turn a no into a yes.",
+      "I'm not discussing this further tonight.",
+    ],
+  },
+  {
+    id: "reproductive-coercion",
+    label: "Reproductive coercion",
+    family: "boundary",
+    severity: 3,
+    lineage: "Miller et al. (2010); ACOG Committee Opinion 554 on reproductive and sexual coercion.",
+    mechanism:
+      "Control is exercised over contraception, pregnancy, or termination — sabotage, refusal, or threats tied to " +
+      "reproductive decisions. Recognized in obstetric practice as a distinct and serious form of intimate-partner " +
+      "violence, because it binds a person's body and future to another's will.",
+    patterns: [
+      /(?:i|we) (?:threw out|hid|stopped) (?:your|the) (?:pill|pills|birth control|iud)\b[^.!?\n]*/gi,
+      /you'?re going to have (?:my|this) baby\b[^.!?\n]*/gi,
+      /if you (?:get|have) an abortion\b[^.!?\n]*/gi,
+      /i'?ll (?:leave|hurt) you if you don'?t (?:get pregnant|keep it)\b[^.!?\n]*/gi,
+      /(?:stop|quit) taking (?:your|the) (?:pill|birth control)\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "Decisions about my body are mine alone.",
+      "This isn't a shared decision in the way you're describing it.",
+      "I'm going to talk to a doctor about this privately.",
+    ],
+  },
+
+  /* ==========================================================================
+     ACCOUNTABILITY EVASION
+     ========================================================================== */
+  {
+    id: "non-apology",
+    label: "Non-apology",
+    family: "blame",
+    severity: 2,
+    lineage: "Lazare (2004), 'On Apology'; Kampf (2009) on the linguistics of non-apologies.",
+    mechanism:
+      "The form of an apology is delivered without its content. 'I'm sorry you feel that way' apologizes for your " +
+      "reaction; 'I'm sorry if' makes the harm hypothetical; 'I'm sorry, but' retracts itself mid-sentence. Each " +
+      "closes the subject while conceding nothing — and leaves you looking unreasonable for not accepting it.",
+    patterns: [
+      /i'?m sorry (?:that )?you (?:feel|felt|think|took|got)\b[^.!?\n]*/gi,
+      /i'?m sorry (?:if|but)\b[^.!?\n]*/gi,
+      /i apologi[sz]e (?:if|but)\b[^.!?\n]*/gi,
+      /sorry (?:you were|if you were|that you were) (?:offended|upset|hurt)\b[^.!?\n]*/gi,
+      /i said i'?m sorry,? what (?:else|more) do you want\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "That's an apology for my reaction. I'm asking about the action.",
+      "I'd rather hear what you'll do differently than hear sorry.",
+      "I don't need an apology. I need it to stop.",
+    ],
+    note:
+      "A real apology names the act, owns it without conditions, and says what changes. Anything shorter is worth " +
+      "noticing — though tone matters, and some people simply apologize clumsily.",
+  },
+  {
+    id: "moving-goalposts",
+    label: "Moving goalposts",
+    family: "rhetoric",
+    severity: 2,
+    lineage: "Informal fallacy of shifting the standard of proof; documented in coercive-control compliance cycles.",
+    mechanism:
+      "Each time you meet the stated condition, the condition changes. The point is not the standard — it is the " +
+      "permanent state of being not-yet-enough, which keeps you working and keeps the speaker judging.",
+    patterns: [
+      /(?:that'?s|thats) (?:still )?not (?:good )?enough\b[^.!?\n]*/gi,
+      /(?:now|and) i (?:also )?need you to\b[^.!?\n]*/gi,
+      /i never said that was all\b[^.!?\n]*/gi,
+      /(?:sure,? )?but you (?:still )?(?:didn'?t|haven'?t)\b[^.!?\n]*/gi,
+      /that'?s the (?:bare )?minimum\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "I met what you asked for. I'm not adding a new requirement to the same task.",
+      "Let's agree on what 'done' means before I start.",
+      "I notice the standard changed. I'm working to the original one.",
+    ],
+  },
+  {
+    id: "tone-policing",
+    label: "Tone policing",
+    family: "rhetoric",
+    severity: 1,
+    lineage: "Standard in discourse ethics; Sue (2010) on microaggression and the derailment of grievances.",
+    mechanism:
+      "The substance is set aside pending an unattainable standard of delivery. Because distress is a natural " +
+      "response to the thing being raised, this reliably converts the complaint into evidence of unfitness to complain.",
+    patterns: [
+      /i'?ll talk to you when you'?re (?:calm|rational|reasonable|an adult)\b[^.!?\n]*/gi,
+      /(?:watch|check) your tone\b[^.!?\n]*/gi,
+      /you'?re being (?:hysterical|unhinged|irrational)\b[^.!?\n]*/gi,
+      /no (?:need|reason) to (?:get|be) (?:upset|emotional|like that)\b[^.!?\n]*/gi,
+      /if you could (?:just )?say it (?:nicely|without)\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "My delivery isn't the topic. The thing I raised is.",
+      "I can say it more calmly. The content won't change.",
+      "I'd rather address the issue than my volume.",
+    ],
+  },
+  {
+    id: "mind-reading",
+    label: "Assumed intent",
+    family: "rhetoric",
+    severity: 1,
+    lineage: "Beck (1976) on mind-reading as a cognitive distortion; Gottman on negative sentiment override.",
+    mechanism:
+      "Your inner state is asserted rather than asked about, and usually assigned a motive worse than the one you " +
+      "had. Since you cannot disprove a claim about your own mind, the accusation is unfalsifiable by design.",
+    patterns: [
+      /you did that on purpose\b[^.!?\n]*/gi,
+      /(?:i know|we both know) (?:what|why) you (?:really )?(?:meant|wanted|did)\b[^.!?\n]*/gi,
+      /don'?t (?:pretend|act like) you didn'?t\b[^.!?\n]*/gi,
+      /you (?:only|just) (?:said|did) that to\b[^.!?\n]*/gi,
+      /you'?re trying to make me (?:feel|look)\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "That wasn't my intent. You can ask me what I meant.",
+      "I'll tell you what I was thinking; I'd rather not have it assigned to me.",
+      "We can discuss impact without deciding my motive.",
+    ],
+  },
+  {
+    id: "selective-memory",
+    label: "Selective recall",
+    family: "reality",
+    severity: 1,
+    lineage: "Adjacent to gaslighting (Sweet, 2019); distinguished by scope — episodic, not systematic.",
+    mechanism:
+      "Inconvenient specifics vanish while convenient ones stay vivid. Milder than full reality denial, but " +
+      "cumulatively it teaches you that documentation is the only way to be believed.",
+    patterns: [
+      /i don'?t remember (?:that|saying|any of that|it that way)\b[^.!?\n]*/gi,
+      /(?:that'?s|thats) not how i remember it\b[^.!?\n]*/gi,
+      /(?:if|when) i said (?:that|it),? i didn'?t mean\b[^.!?\n]*/gi,
+      /you must have (?:misheard|misunderstood)\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "I'm confident about what was said. I'll work from my own notes.",
+      "Let's not relitigate the transcript. Here's what I need going forward.",
+      "I'll put things in writing from now on so neither of us has to remember.",
+    ],
+    note: "People genuinely forget. Weight this by how often the forgetting favours the same person.",
+  },
+
+  /* ==========================================================================
+     CONTROL OF RESOURCES, STATUS, AND STANDING
+     ========================================================================== */
+  {
+    id: "financial-control",
+    label: "Financial control",
+    family: "coercion",
+    severity: 3,
+    lineage: "Adams et al. (2008), Scale of Economic Abuse; Stark (2007) on resource deprivation as control.",
+    mechanism:
+      "Access to money is converted into permission to exist independently. Economic abuse is among the strongest " +
+      "predictors of whether someone can leave a relationship at all — which is precisely its function.",
+    patterns: [
+      /(?:it'?s|its) my money\b[^.!?\n]*/gi,
+      /you don'?t (?:need|get) (?:your own )?(?:card|account|money|allowance)\b[^.!?\n]*/gi,
+      /i pay for everything (?:around here|here)?\b[^.!?\n]*/gi,
+      /you'?d have nothing without me\b[^.!?\n]*/gi,
+      /i'?ll cut you off\b[^.!?\n]*/gi,
+      /you don'?t need (?:a|that) job\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "I need access to our finances. That isn't optional for me.",
+      "I'm going to open an account in my own name.",
+      "Money isn't a reward for agreement.",
+    ],
+  },
+  {
+    id: "status-threat",
+    label: "Institutional threat",
+    family: "coercion",
+    severity: 3,
+    lineage: "Documented in coercive-control literature as 'systems abuse' — legal, immigration, and employment leverage.",
+    mechanism:
+      "The threat is outsourced to an institution — police, immigration, employer, child services, courts — which " +
+      "makes it feel both larger and deniable. Especially effective where the target's status is already precarious.",
+    patterns: [
+      /i'?ll (?:call|report you to) (?:ice|immigration|the irs|your boss|cps|child services|the police|the cops)\b[^.!?\n]*/gi,
+      /you'?ll be deported\b[^.!?\n]*/gi,
+      /i'?ll have you (?:fired|arrested|committed|evicted)\b[^.!?\n]*/gi,
+      /i'?ll (?:take|get) (?:full )?custody\b[^.!?\n]*/gi,
+      /(?:no|which) (?:judge|court) (?:will|would) believe you\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "I'm noting that threat and I'm going to get advice about it.",
+      "I won't make decisions under threat of a report.",
+      "This conversation is over. I'll follow up in writing.",
+    ],
+    note: "If this appears, documenting it — dates, exact wording — matters. Consider speaking to an advocate or lawyer.",
+  },
+  {
+    id: "smear-campaign",
+    label: "Reputation leverage",
+    family: "coercion",
+    severity: 2,
+    lineage: "Coercive-control literature on 'social abuse'; recruitment of third parties ('flying monkeys').",
+    mechanism:
+      "Your standing with other people is used as collateral. Pre-emptive framing of you to your own network means " +
+      "any later account you give arrives sounding like a reaction rather than a report.",
+    patterns: [
+      /wait (?:until|till|til) (?:everyone|they|your family|he|she) (?:hears?|finds? out|knows?)\b[^.!?\n]*/gi,
+      /i (?:already )?(?:told|talked to) (?:your|the) (?:family|boss|friends|mom|kids)\b[^.!?\n]*/gi,
+      /i'?ll (?:tell|show) everyone what you (?:did|really)\b[^.!?\n]*/gi,
+      /(?:everyone|they all) (?:know|knows) what you (?:did|are)\b[^.!?\n]*/gi,
+      /i have (?:screenshots|receipts|proof) of\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "People can hear whatever version they like. I'll keep telling the truth.",
+      "That's a threat about my reputation, and it doesn't change my answer.",
+      "I'm going to talk to the people who matter to me directly.",
+    ],
+  },
+  {
+    id: "self-harm-leverage",
+    label: "Self-harm as leverage",
+    family: "coercion",
+    severity: 3,
+    lineage: "Recognized in coercive-control and crisis literature as suicide-threat coercion; requires a dual response.",
+    mechanism:
+      "Your compliance is tied to the speaker's survival, placing you in an impossible bind: leaving becomes " +
+      "something you would have caused. The distress may be entirely genuine — and it still cannot be your " +
+      "responsibility to manage by staying.",
+    patterns: [
+      /(?:maybe )?i should just (?:kill myself|end it|disappear|not be here)\b[^.!?\n]*/gi,
+      /you'?d be better off without me\b[^.!?\n]*/gi,
+      /if you leave,? i'?ll (?:kill myself|hurt myself|end it)\b[^.!?\n]*/gi,
+      /i (?:have|have got) nothing (?:left )?to live for\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "I take that seriously, which is why I'm calling a crisis line with you — not changing my decision.",
+      "Your safety matters. It can't be my job to guarantee it by staying.",
+      "I'm going to get someone qualified involved right now.",
+    ],
+    note:
+      "Treat every such statement as potentially sincere: contact a crisis line. Taking it seriously and refusing " +
+      "to be controlled by it are not in conflict.",
+  },
+
+  /* ==========================================================================
+     ATTACHMENT MANIPULATION & LABOUR
+     ========================================================================== */
+  {
+    id: "love-bombing",
+    label: "Love bombing / idealization",
+    family: "obligation",
+    severity: 1,
+    lineage: "Strutzenberg et al. (2017); idealization-devaluation cycle in the intimate-partner-violence literature.",
+    mechanism:
+      "Intensity is front-loaded far past the depth of the relationship — total certainty, instant future, " +
+      "overwhelming attention. It builds a debt of devotion early that can be called in later, and makes any " +
+      "future coldness feel like something you lost rather than something you were given.",
+    patterns: [
+      /i (?:can'?t|cannot) live without you\b[^.!?\n]*/gi,
+      /you'?re my (?:everything|whole world|soulmate|other half)\b[^.!?\n]*/gi,
+      /i knew (?:right away|immediately|the moment) you were the one\b[^.!?\n]*/gi,
+      /no one (?:has ever|will ever) (?:love|understand) you like i do\b[^.!?\n]*/gi,
+      /we'?re meant to be\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "I'd like to move at a pace where we actually get to know each other.",
+      "That's a lot of certainty this early. I'm still forming my view.",
+      "I like you. I'm not ready for 'forever' language yet.",
+    ],
+    note:
+      "Sincere early affection exists and is lovely. The signal is intensity that outruns knowledge — and how it's " +
+      "invoked later.",
+  },
+  {
+    id: "weaponized-incompetence",
+    label: "Weaponized incompetence",
+    family: "obligation",
+    severity: 1,
+    lineage: "Hochschild (1989), 'The Second Shift'; Daminger (2019) on the cognitive load of household labour.",
+    mechanism:
+      "Failure is performed until the task returns to you permanently. The result is that the labour, and the " +
+      "management of the labour, both stay yours — while the refusal never has to be spoken aloud.",
+    patterns: [
+      /you'?re (?:just )?(?:so much )?better at (?:it|this|that) than me\b[^.!?\n]*/gi,
+      /i (?:always|just) (?:mess|screw) (?:it|that) up\b[^.!?\n]*/gi,
+      /you'?ll (?:just )?(?:redo|fix) it anyway\b[^.!?\n]*/gi,
+      /i don'?t know how (?:you want it|to do it right)\b[^.!?\n]*/gi,
+      /just (?:tell|remind) me what to do\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "I'd like you to own this task end to end, including remembering it.",
+      "Doing it imperfectly is fine. Not doing it isn't.",
+      "I'm not going to manage this for you — it's yours now.",
+    ],
+  },
+  {
+    id: "infantilization",
+    label: "Infantilization",
+    family: "escalation",
+    severity: 2,
+    lineage: "Stark (2007) on the reduction of adult autonomy; documented in elder- and partner-abuse research.",
+    mechanism:
+      "You are addressed as someone not competent to run your own life — decisions pre-empted, capabilities " +
+      "doubted aloud, autonomy framed as a risk. It manufactures the dependence it claims to have discovered.",
+    patterns: [
+      /you (?:can'?t|couldn'?t) (?:even )?(?:handle|manage|do) (?:that|this|it)(?: on your own| without me| by yourself)\b[^.!?\n]*/gi,
+      /(?:let|leave it to) the adults\b[^.!?\n]*/gi,
+      /you'?re (?:acting like|being) (?:a|such a) (?:child|baby|toddler)\b[^.!?\n]*/gi,
+      /i'?ll (?:handle|decide) (?:it|that) (?:for you|since you can'?t)\b[^.!?\n]*/gi,
+      /(?:good girl|good boy)\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "I'm capable of deciding this myself.",
+      "I'll ask if I want help. Please don't decide for me.",
+      "Talk to me like an adult and we can continue.",
+    ],
+  },
+  {
+    id: "spiritual-leverage",
+    label: "Moral or spiritual leverage",
+    family: "obligation",
+    severity: 2,
+    lineage: "Oakley & Kinmond (2013) on spiritual abuse; Duluth model adaptations for faith communities.",
+    mechanism:
+      "A higher authority is invoked as the one issuing the instruction, so refusing the speaker becomes refusing " +
+      "God, the family, or the culture. Disagreement is reframed as moral failure, which is far harder to hold a " +
+      "boundary against than a mere demand.",
+    patterns: [
+      /god (?:wants|says|commands|expects) you to\b[^.!?\n]*/gi,
+      /you'?re going to hell (?:if|for)\b[^.!?\n]*/gi,
+      /(?:the )?bible says you (?:must|have to|should)\b[^.!?\n]*/gi,
+      /(?:submit|be submissive) to (?:me|your husband)\b[^.!?\n]*/gi,
+      /(?:a )?(?:real|good) (?:christian|muslim|jew|believer) would\b[^.!?\n]*/gi,
+      /you'?re (?:shaming|dishonoring) (?:the|your) family\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "My faith is between me and God, not me and you.",
+      "I'd like to talk to someone else in the community about this.",
+      "Invoking that doesn't settle the question.",
+    ],
+  },
+  {
+    id: "score-keeping",
+    label: "Score-keeping",
+    family: "obligation",
+    severity: 1,
+    lineage: "Equity theory (Walster et al., 1978); Gottman on the 'ledger' pattern in distressed couples.",
+    mechanism:
+      "The relationship is run as an account with a running balance you are always overdrawn on. Every gift " +
+      "retroactively becomes a loan, which quietly makes accepting anything expensive.",
+    patterns: [
+      /after all the times i\b[^.!?\n]*/gi,
+      /i'?m always the one who\b[^.!?\n]*/gi,
+      /(?:remember )?when i [^.!?\n]{0,40}? and you (?:didn'?t|never)\b[^.!?\n]*/gi,
+      /i do everything (?:around here|for you|for this family)\b[^.!?\n]*/gi,
+      /(?:when'?s|when is) the last time you\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "I don't want to keep a ledger. I want to talk about this week.",
+      "If the balance feels off, let's rebalance going forward rather than back.",
+      "I'm glad to do more. I'm not paying off a debt.",
+    ],
+  },
 ];
 
 /**
@@ -836,6 +1278,18 @@ const ABSOLUTES = ["always", "never", "everyone", "nobody", "no one", "everythin
 const HEDGES = ["maybe", "perhaps", "i think", "i feel", "it seems", "possibly", "might", "could be"];
 const REPAIR = ["i'm sorry", "im sorry", "i apologize", "you're right", "youre right", "i understand", "fair enough",
                 "that makes sense", "thank you", "i hear you", "my fault", "i was wrong"];
+/**
+ * Apology-shaped phrases that concede nothing. These must be subtracted from the
+ * repair count — otherwise "I'm sorry you feel that way" would *lower* a message's
+ * pressure score, letting the most common accountability dodge in the language
+ * quietly mask everything around it.
+ */
+const NON_APOLOGY = [
+  /i'?m sorry (?:that )?you (?:feel|felt|think|took|got)/gi,
+  /i'?m sorry (?:if|but)/gi,
+  /i apologi[sz]e (?:if|but)/gi,
+  /sorry (?:you were|if you were|that you were) (?:offended|upset|hurt)/gi,
+];
 const OBLIGATION_MODALS = /\b(?:you (?:should|must|have to|need to|better|ought to)|don'?t you dare)\b/gi;
 
 /**
@@ -872,7 +1326,12 @@ function hedgeCount(text) {
  */
 function repairCount(text) {
   const lower = text.toLowerCase();
-  return REPAIR.reduce((n, r) => n + (lower.split(r).length - 1), 0);
+  const raw = REPAIR.reduce((n, r) => n + (lower.split(r).length - 1), 0);
+  const hollow = NON_APOLOGY.reduce((n, re) => {
+    re.lastIndex = 0;
+    return n + (text.match(re) || []).length;
+  }, 0);
+  return Math.max(0, raw - hollow);
 }
 
 function obligationDensity(text) {
