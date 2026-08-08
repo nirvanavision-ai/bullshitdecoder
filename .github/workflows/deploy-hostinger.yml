@@ -1,0 +1,85 @@
+# Deploy to Hostinger over SSH on every push to main.
+#
+# This is the "live update" path: push → tests run → files sync to the web root.
+#
+# One-time setup (see README "Hostinger auto-deploy"):
+#   Add four repository secrets under Settings → Secrets and variables → Actions:
+#     HOSTINGER_HOST  62.72.50.219
+#     HOSTINGER_PORT  65002
+#     HOSTINGER_USER  u994384584
+#     HOSTINGER_KEY   the PRIVATE half of an SSH keypair whose PUBLIC half is
+#                     registered under hPanel → SSH Access → Add SSH key
+#     HOSTINGER_PATH  (optional) web root; defaults to
+#                     domains/bullshitdecoder.com/public_html
+#
+# Never paste a private key into a file, a chat, or a commit — only into the
+# encrypted secret store.
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: hostinger-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run engine tests
+        run: npm test
+
+      - name: Rebuild index.html from source
+        run: node build-standalone.js
+
+      - name: Configure SSH
+        env:
+          KEY: ${{ secrets.HOSTINGER_KEY }}
+          HOST: ${{ secrets.HOSTINGER_HOST }}
+          PORT: ${{ secrets.HOSTINGER_PORT }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          # Pin the host key so this can't be silently MITM'd.
+          ssh-keyscan -p "$PORT" -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Sync site to web root
+        env:
+          HOST: ${{ secrets.HOSTINGER_HOST }}
+          PORT: ${{ secrets.HOSTINGER_PORT }}
+          USER: ${{ secrets.HOSTINGER_USER }}
+          PATH_REMOTE: ${{ secrets.HOSTINGER_PATH }}
+        run: |
+          TARGET="${PATH_REMOTE:-domains/bullshitdecoder.com/public_html}"
+          echo "Deploying to $USER@$HOST:$TARGET"
+          # --delete keeps the server an exact mirror of the repo, so files
+          # removed here disappear there too. Everything served is in git.
+          rsync -avz --delete \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'node_modules' \
+            --exclude 'tests' \
+            --exclude 'build-standalone.js' \
+            --exclude 'package.json' \
+            --exclude 'netlify.toml' \
+            --exclude 'README.md' \
+            -e "ssh -p $PORT -i ~/.ssh/id_deploy -o StrictHostKeyChecking=yes" \
+            ./ "$USER@$HOST:$TARGET/"
+
+      - name: Verify the deployed site responds
+        run: |
+          code=$(curl -sS -o /dev/null -w '%{http_code}' https://bullshitdecoder.com/ || echo 000)
+          echo "https://bullshitdecoder.com/ → $code"
+          if [ "$code" != "200" ]; then
+            echo "::warning::Site did not return 200 (got $code). If DNS points elsewhere this is expected."
+          fi

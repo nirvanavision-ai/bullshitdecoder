@@ -216,3 +216,45 @@ npm run build   # → standalone.html (65 KB, works from file://)
 
 Useful for emailing, USB, or hosts that mis-serve `.js` MIME types. Same app, no modules,
 no network. The modular source stays the canonical version.
+
+---
+
+## Hostinger auto-deploy (live update on every push)
+
+`.github/workflows/deploy-hostinger.yml` syncs the site to Hostinger over SSH
+whenever `main` changes. One-time setup:
+
+**1. Make a deploy keypair** (on your own machine — never in a repo):
+
+```bash
+ssh-keygen -t ed25519 -C "github-deploy-bullshitdecoder" -f ~/.ssh/hostinger_deploy
+```
+
+**2. Register the PUBLIC half with Hostinger:** hPanel → SSH Access → **Add SSH key**
+→ paste the contents of `~/.ssh/hostinger_deploy.pub`.
+
+**3. Add repository secrets** on GitHub (Settings → Secrets and variables →
+Actions → New repository secret):
+
+| Secret | Value |
+|---|---|
+| `HOSTINGER_HOST` | your server IP (hPanel → SSH Access) |
+| `HOSTINGER_PORT` | your SSH port |
+| `HOSTINGER_USER` | your SSH username |
+| `HOSTINGER_KEY` | contents of the **private** key `~/.ssh/hostinger_deploy` — the whole file, including the BEGIN/END lines |
+| `HOSTINGER_PATH` | optional; web root, defaults to `domains/bullshitdecoder.com/public_html` |
+
+**4. Push anything.** Actions runs the tests, rebuilds `index.html`, and rsyncs
+to the web root.
+
+Notes:
+- The private key belongs only in the encrypted secret store — never in a file,
+  a commit, or a chat message.
+- The sync uses `--delete`, so the web root becomes an exact mirror of the repo.
+  Anything you uploaded to the server by hand and did not commit will be removed.
+- Find your web root with `ls ~/domains/*/public_html` over SSH if the default
+  path is wrong, then set `HOSTINGER_PATH`.
+
+If you'd rather not manage SSH keys, GitHub Pages already deploys this repo
+automatically via `.github/workflows/pages.yml` — point the domain's DNS at
+GitHub instead and delete this workflow.
