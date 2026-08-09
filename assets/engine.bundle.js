@@ -823,6 +823,118 @@ const TAXONOMY = [
       "I'm glad to do more. I'm not paying off a debt.",
     ],
   },
+
+  /* ==========================================================================
+     THE COVERT-DECEPTION CLUSTER
+     Added from the clinical frameworks supplied with this project. These four
+     describe the "saint and scapegoat" architecture: private provocation,
+     public virtue, and the pre-emptive discrediting that makes the victim
+     unbelievable before they ever speak.
+     ========================================================================== */
+  {
+    id: "reactive-framing",
+    label: "Reactive-abuse framing",
+    family: "blame",
+    severity: 3,
+    lineage: "Reactive-abuse literature; Freyd on betrayal trauma. Distress cited as pathology rather than response.",
+    mechanism:
+      "Sustained provocation produces a completely ordinary human reaction — frustration, tears, raised voice — " +
+      "and that reaction is then presented as the real problem. The speaker adopts a calm, patronizing register " +
+      "precisely because the contrast is the argument: their composure against your distress. The trigger is " +
+      "never mentioned. What you are watching is a normal physiological response to an abnormal environment, " +
+      "being re-labelled as instability.",
+    patterns: [
+      /(?:listen to|look at) (?:yourself|how you'?re acting|the way you'?re talking)\b[^.!?\n]*/gi,
+      /(?:this|that) is (?:exactly )?(?:what i(?:'?m| am) talking about|my point|why i said)\b[^.!?\n]*/gi,
+      /you'?re proving my point\b[^.!?\n]*/gi,
+      /i'?m (?:the one )?(?:being |staying )?(?:calm|reasonable|rational) here\b[^.!?\n]*/gi,
+      /(?:and )?(?:you wonder|this is) why (?:i|people) (?:don'?t|can'?t)\b[^.!?\n]*/gi,
+      /i (?:can'?t|won'?t) talk to you when you'?re like this\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "I'm upset because of what happened, not instead of it. Let's go back to that.",
+      "My reaction isn't the subject. The thing that caused it is.",
+      "I'll take a break and come back. The issue will still be there.",
+    ],
+    note:
+      "If you have ever been told you are 'too much' for reacting to something that was genuinely done to you, " +
+      "this is the pattern with a name. Composure is not evidence of innocence.",
+  },
+  {
+    id: "altruistic-alibi",
+    label: "Altruistic alibi",
+    family: "reality",
+    severity: 2,
+    lineage: "Covert-deception frameworks on altruistic reframing; halo effect (Thorndike, 1920).",
+    mechanism:
+      "Caught with something concrete — messages, money, an object — the speaker does not deny it but re-narrates " +
+      "it as a secret act of virtue: they were counselling someone in crisis, holding an addict's possessions, " +
+      "protecting a third party's privacy. Exposure becomes a demonstration of goodness, and the years of visible " +
+      "charity lend the story an unearned plausibility.",
+    patterns: [
+      /i was (?:just |only )?(?:trying to )?(?:help|counsel|support|save|minister to) (?:her|him|them|a friend)\b[^.!?\n]*/gi,
+      /(?:it'?s|its|they'?re) not mine,? (?:it'?s|its|they'?re) (?:a friend'?s|hers|his|theirs)\b[^.!?\n]*/gi,
+      /i (?:kept|didn'?t say) (?:it|that) (?:secret |quiet )?to protect (?:her|him|them|their privacy)\b[^.!?\n]*/gi,
+      /(?:she|he|they) (?:was|were) going through (?:something|a lot|a hard time) and\b[^.!?\n]*/gi,
+      /you (?:always )?(?:think|assume) the worst of me\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "That may be true. I'd still like to see it, plainly, now.",
+      "Helping someone doesn't require hiding it from me.",
+      "I'm not judging the motive. I'm asking about the fact.",
+    ],
+    note:
+      "Sometimes the charitable explanation is the true one. What distinguishes the pattern is that it appears " +
+      "only after discovery, and never before.",
+  },
+  {
+    id: "preemptive-discredit",
+    label: "Pre-emptive discrediting",
+    family: "coercion",
+    severity: 3,
+    lineage: "'Saint and scapegoat' framing in covert-deception literature; DARVO's reputational arm (Freyd).",
+    mechanism:
+      "Before you have said anything to anyone, your credibility is quietly spent — you are described to friends, " +
+      "family, or the congregation as unstable, difficult, unwell, or 'going through a lot,' always in a tone of " +
+      "concern. It is insurance: if you ever do speak, the account arrives pre-labelled as symptom. Any distress " +
+      "you later show is then read by everyone as confirmation.",
+    patterns: [
+      /i'?ve been (?:so |really )?worried about (?:you|her|him|them)\b[^.!?\n]*/gi,
+      /(?:everyone|they|people) (?:already )?(?:knows?|can see) (?:how|what) you(?:'?re| are)\b[^.!?\n]*/gi,
+      /i'?ve had to (?:cover for|explain|apologi[sz]e for) you\b[^.!?\n]*/gi,
+      /i (?:didn'?t|haven'?t) told (?:them|anyone) (?:everything|the whole story)\b[^.!?\n]*/gi,
+      /(?:they|everyone) (?:think|thinks) you'?re (?:unstable|difficult|too much|unwell)\b[^.!?\n]*/gi,
+      /no one would believe you (?:anyway|over me)\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "If you have concerns about me, say them to me — not about me.",
+      "I'll speak for myself to the people who matter to me.",
+      "Being described as unwell doesn't make me unwell, and it doesn't settle the question.",
+    ],
+  },
+  {
+    id: "performative-virtue",
+    label: "Performative virtue",
+    family: "rhetoric",
+    severity: 1,
+    lineage: "Halo effect (Thorndike, 1920); cultural mimicry and moral-credential effects (Monin & Miller, 2001).",
+    mechanism:
+      "Public good deeds are entered as evidence in a private dispute. Because the community has witnessed the " +
+      "charity and not the conduct, the record of visible virtue is offered as proof that the reported behaviour " +
+      "cannot have happened — a moral credential spent to buy immunity from a specific question.",
+    patterns: [
+      /after everything i do for (?:this family|the church|everyone|the community)\b[^.!?\n]*/gi,
+      /(?:ask )?anyone (?:who knows me|at (?:church|work)) (?:will tell you|would tell you)\b[^.!?\n]*/gi,
+      /(?:do you think|would) (?:someone|a person) (?:who|that) (?:does what i do|helps people) (?:would|could)\b[^.!?\n]*/gi,
+      /i'?m (?:not|hardly) (?:that kind of|a bad) (?:person|man|woman)\b[^.!?\n]*/gi,
+      /i (?:give|volunteer|donate|serve)[^.!?\n]{0,40}? and you\b[^.!?\n]*/gi,
+    ],
+    scripts: [
+      "Both can be true. I'm asking about this one thing.",
+      "Your reputation isn't in question. The event is.",
+      "Good deeds elsewhere don't answer what I asked.",
+    ],
+  },
 ];
 
 /**

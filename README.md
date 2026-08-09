@@ -274,3 +274,38 @@ Notes:
 If you'd rather not manage SSH keys, GitHub Pages already deploys this repo
 automatically via `.github/workflows/pages.yml` — point the domain's DNS at
 GitHub instead and delete this workflow.
+
+---
+
+## Materials vault (the "upload backend")
+
+`assets/js/vault.js` is the persistence layer for materials a visitor brings in:
+audio, video, images, transcripts. It has real backend semantics — durable
+storage, an object store with indexes, CRUD, quota reporting, manifest export —
+implemented on **IndexedDB inside the visitor's own browser**.
+
+**Why not a server.** The obvious build is an endpoint that receives uploads.
+For this project that is the wrong build, and not because it is hard: the
+materials people bring here are recordings of their private lives, usually
+involving other people who never consented to be recorded or hosted. The moment
+those bytes leave the device they become someone's liability — a breach, a
+subpoena, a host's malware scanner, an administrator with database access. The
+site's central claim is that none of this can happen because it structurally
+cannot happen. A server would make that claim false.
+
+What the vault gives instead:
+
+- materials persist across reloads, restarts, and days away
+- the same vault is visible from every console on the site
+- transcripts (`.srt`/`.vtt`/`.txt`) are stripped of timing and fed to the analyzer
+- audio and video get local players; nothing is transcoded or transmitted
+- **Export manifest** writes metadata only — never the bytes
+- **Erase vault** is one button and is immediate
+
+### If you really need a server
+
+Only worth it for multi-device sync, and only built this way: authenticated
+(not public), encrypted at rest with a key the server does not hold, per-user
+isolation, a hard delete path, and no indexing or public URLs of any kind. That
+is a different product with a different threat model — not a page on a public
+website.

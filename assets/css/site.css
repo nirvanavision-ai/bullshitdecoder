@@ -441,3 +441,14 @@ body.museum .exhibit-topcap {
   text-transform: uppercase; margin-left: auto; display: flex; gap: 18px; align-items: center;
 }
 .ex-italic { font-family: var(--display); font-style: italic; font-weight: 500; font-size: 15px; color: var(--verm); }
+
+/* vault status bar */
+.uz-vaultbar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px;
+  padding-top: 12px; border-top: 1px solid var(--f-line);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; color: var(--f-mute);
+  text-transform: uppercase;
+}
+.uz-vaultbar span { margin-right: auto; }
+.uz-vaultbar button { font-size: 10.5px; padding: 6px 12px; letter-spacing: .1em; }
+.uz-vaultbar button[data-act="wipe"]:hover { border-color: #c0392b; color: #c0392b; }
