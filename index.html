@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>THE BULLSHIT DECODER — language is evidence</title>
+<title>THE BULLSHIT DECODER — museum of said things</title>
 <meta name="description" content="A walk through three instruments for naming manipulation: a live decoder, a hall of audio evidence, and an argument-autopsy console. Everything runs in your browser; nothing is uploaded.">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f3f0e8'/%3E%3Ctext x='16' y='24' font-family='Georgia,serif' font-size='22' font-weight='700' text-anchor='middle' fill='%23d63d1e'%3EB%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/site.css">
 </head>
-<body class="foundry">
+<body class="foundry museum">
 
 <canvas id="ink" aria-hidden="true"></canvas>
 <div id="hallbg" aria-hidden="true"></div>
@@ -32,29 +32,32 @@
     <a href="oblivion/">O.B.L.I.V.I.O.N.</a>
     <a href="gaslight/">Gaslight Protocols</a>
   </div>
-  <span class="navtag">local analysis · nothing uploaded</span>
+  <span class="exhibit-topcap"><span>Museum of said things · Hall of dust</span><span id="excount">01 / 05</span></span>
 </nav>
 
 <main class="walk" id="walk">
 
-  <!-- ROOM 01 · THE FOUNDRY -->
-  <section class="room hero" data-scene="glyph" data-state="CASTING">
+  <!-- ROOM 01 · EXHIBIT I — THE HEART -->
+  <section class="room hero hall" data-scene="heart" data-state="EXHIBIT I">
     <span class="idx">01</span>
-    <div class="hero-grid">
-      <div>
-        <p class="kicker reveal">A forensic foundry — <em>language, set in ink</em></p>
-        <h1 class="display reveal">Language is<br><span class="verm">evidence.</span></h1>
-        <p class="lede reveal">
-          Several thousand grains of ink, sampled from the letter's own outline. They settle into a
-          glyph, and yield when you move across them — carve a hollow, lift your hand, and it heals.
-          Every sentence ever said to you is built from the same material. This site reads the grain.
-        </p>
-        <div class="castrow reveal" id="castrow" role="group" aria-label="Choose the specimen glyph"></div>
-        <p class="hint reveal" style="margin-top:20px">move over the letterform to carve it · click a cast to recast</p>
+    <div class="hall-grid">
+      <div class="hall-stage" id="glyphside">
+        <span class="focus-hint">move to carve · press and hold to focus</span>
       </div>
-      <div class="hero-glyphside" id="glyphside">
-        <span class="glyph-meta a">State<span class="big" id="glyph-state">CAST</span></span>
-        <span class="glyph-meta b">Specimen · 144pt · Black<span class="big">Aa — 01</span></span>
+      <div>
+        <div class="plaque reveal">
+          <span class="ex-no">Exhibit I</span>
+          <h3>The Heart</h3>
+          <div class="ex-caps">Human · whole, at intake<br>Donor unknown · condition — negotiable<br>Holding, or being held — undetermined</div>
+          <hr>
+          <p>The first artifact is the one everyone arrives carrying. A heart, mid-gesture, caught
+             between offering and withdrawing. We do not know whose it was. Every visitor who has
+             stood before it has reported the same thing: that it looks exactly like their own.</p>
+          <p>It is assembled from dust because that is what a heart becomes when the sentences said
+             to it go unexamined. The instruments in this museum exist to examine the sentences.</p>
+          <span class="ex-foot">Anatomical point-sampling · <span id="heartcount">—</span> grains</span>
+          <div class="castrow" id="castrow" role="group" aria-label="Choose the exhibit form" style="margin-top:22px"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -220,9 +223,23 @@
     if (shapeCache[key]) return shapeCache[key];
     const oc = document.createElement("canvas"); oc.width = oc.height = 480;
     const o = oc.getContext("2d");
-    o.fillStyle = "#000"; o.textAlign = "center"; o.textBaseline = "middle";
-    o.font = "900 " + fontPx + "px " + fontFam;
-    o.fillText(str, 240, 250);
+    o.fillStyle = "#000";
+    if (str === "\u2665") {
+      /* parametric heart — text glyphs render as colour emoji on some platforms,
+         so the exhibit is drawn from the classical curve instead */
+      o.beginPath();
+      for (let t = 0; t <= Math.PI * 2 + 0.01; t += 0.02) {
+        const hx = 16 * Math.pow(Math.sin(t), 3);
+        const hy = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+        const px2 = 240 + hx * 12.5, py2 = 235 - hy * 12.5;
+        t === 0 ? o.moveTo(px2, py2) : o.lineTo(px2, py2);
+      }
+      o.closePath(); o.fill();
+    } else {
+      o.textAlign = "center"; o.textBaseline = "middle";
+      o.font = "900 " + fontPx + "px " + fontFam;
+      o.fillText(str, 240, 250);
+    }
     const d = o.getImageData(0, 0, 480, 480).data;
     const pts = [];
     for (let y = 0; y < 480; y += 3) for (let x = 0; x < 480; x += 3) {
@@ -233,9 +250,9 @@
   }
 
   /* --- scenes: each provides target points inside a viewport region */
-  let scene = "glyph";
-  let heroGlyph = "B";
-  const CASTS = ["B", "S", "?", "&", "@"];
+  let scene = "heart";
+  let heroGlyph = "\u2665";
+  const CASTS = ["\u2665", "\u201C", "?", "&"];
   let region = { x: 0, y: 0, w: 0, h: 0, lastTop: 0 };
 
   function rectOf(el, pad) {
@@ -243,11 +260,19 @@
     return { x: (r.left + (pad || 0)) * DPR, y: r.top * DPR, w: (r.width - 2 * (pad || 0)) * DPR, h: r.height * DPR };
   }
   function sceneRegion(name) {
-    if (name === "glyph") { const el = $("#glyphside"); return el ? rectOf(el, 10) : null; }
+    if (name === "heart") { const el = $("#glyphside"); return el ? rectOf(el, 10) : null; }
     if (name === "dust") { const el = $("#hallstage"); return el ? rectOf(el, 0) : null; }
     return null;
   }
   function assignShape(pts, reg, spreadExtras, scale) {
+    /* Dense shapes can out-sample the grain pool; taking the first N points
+       would keep only the top rows of the form (the heart lost its tip this
+       way). Stride-downsample so coverage always spans the whole shape. */
+    if (pts.length > grains.length) {
+      const step = pts.length / grains.length, ds = [];
+      for (let i = 0; i < grains.length; i++) ds.push(pts[(i * step) | 0]);
+      pts = ds;
+    }
     const size = Math.min(reg.w, reg.h) * (scale || 1);
     const offX = reg.x + (reg.w - size) / 2, offY = reg.y + (reg.h - size) / 2;
     grains.forEach((g, i) => {
@@ -273,11 +298,18 @@
     if (name === scene && !force) return;
     scene = name;
     const reg = sceneRegion(name);
-    if (name === "glyph" && reg) { region = reg; region.lastTop = reg.y; assignShape(sampleText(heroGlyph, 380, "Fraunces, Georgia, serif"), reg, true); }
+    if (name === "heart" && reg) {
+      region = reg; region.lastTop = reg.y;
+      const pts = sampleText(heroGlyph, 380, "Fraunces, Georgia, serif");
+      assignShape(pts, reg, true, 1.15);
+      grains.forEach(g => { g.lit = g.inShape && Math.random() < 0.14; });
+      const hc = $("#heartcount"); if (hc) hc.textContent = Math.min(pts.length, N).toLocaleString();
+    }
     else if (name === "dust" && reg) {
       region = reg; region.lastTop = reg.y;
       const pts = sampleText("“", 460, "Fraunces, Georgia, serif");
       assignShape(pts, reg, true, 1.45);
+      grains.forEach(g => { g.lit = g.inShape && Math.random() < 0.12; });
       $("#dustcount").textContent = Math.min(pts.length, N).toLocaleString();
     }
     else if (name === "frame") { // thin halo around the specimen plate
@@ -306,8 +338,9 @@
     if (focusing) { const fr = $("#focusring"); fr.style.left = e.clientX + "px"; fr.style.top = e.clientY + "px"; }
   }, { passive: true });
   addEventListener("pointerdown", e => {
-    if (scene !== "dust" || RM) return;
-    const st = $("#hallstage").getBoundingClientRect();
+    if ((scene !== "dust" && scene !== "heart") || RM) return;
+    const host = scene === "heart" ? $("#glyphside") : $("#hallstage");
+    const st = host.getBoundingClientRect();
     if (e.clientX >= st.left && e.clientX <= st.right && e.clientY >= st.top && e.clientY <= st.bottom) {
       focusing = true;
       const fr = $("#focusring"); fr.style.left = e.clientX + "px"; fr.style.top = e.clientY + "px"; fr.classList.add("on");
@@ -315,19 +348,12 @@
     }
   });
   addEventListener("pointerup", () => {
-    if (focusing) { focusing = false; $("#focusring").classList.remove("on"); $("#hud-state").textContent = "IN THE HALL"; }
+    if (focusing) { focusing = false; $("#focusring").classList.remove("on"); $("#hud-state").textContent = "VIEWING"; }
   });
 
   /* --- hall mix: how deep into the dark room we are (drives bg, hud, grain colour) */
   let hallMix = 0;
-  function computeHallMix() {
-    const hall = document.querySelector(".room.hall");
-    if (!hall) return 0;
-    const r = hall.getBoundingClientRect();
-    const vh = innerHeight;
-    const cover = clamp((Math.min(r.bottom, vh) - Math.max(r.top, 0)) / vh, 0, 1);
-    return clamp(cover * 1.5 - 0.2, 0, 1);
-  }
+  function computeHallMix() { return 1; } /* museum mode: the whole page is the hall */
 
   /* --- main loop */
   const INK = [25, 22, 17], BONE = [239, 231, 214], AMBER = [215, 157, 74];
@@ -344,8 +370,7 @@
     }
 
     hallMix = computeHallMix();
-    $("#hallbg").style.opacity = hallMix.toFixed(3);
-    document.getElementById("hud").classList.toggle("inverted", hallMix > 0.5);
+    document.getElementById("hud").classList.add("inverted");
 
     cx.clearRect(0, 0, W, H);
     const k = (focusing ? 0.16 : 0.055) * dt;
@@ -382,6 +407,18 @@
       cx.lineWidth = (0.9 + b * 0.35) * DPR;
       cx.stroke(path);
     }
+    /* lit strands — the reference's bright edge */
+    if (scene === "heart" || scene === "dust") {
+      const lp = new Path2D();
+      for (const g of grains) {
+        if (!g.lit) continue;
+        const dx = Math.cos(g.ang) * g.len * DPR * .8, dy = Math.sin(g.ang) * g.len * DPR * .8;
+        lp.moveTo(g.x - dx, g.y - dy); lp.lineTo(g.x + dx, g.y + dy);
+      }
+      cx.strokeStyle = "rgba(255, 251, 240, 0.9)";
+      cx.lineWidth = 1.1 * DPR;
+      cx.stroke(lp);
+    }
     requestAnimationFrame(frame);
   }
 
@@ -394,9 +431,7 @@
     b.addEventListener("click", () => {
       heroGlyph = ch; autoCast = false; syncAuto();
       castrow.querySelectorAll(".castbtn").forEach(x => x.classList.toggle("active", x.textContent === ch));
-      $("#glyph-state").textContent = "RECAST";
-      setTimeout(() => $("#glyph-state").textContent = "CAST", 900);
-      retarget("glyph", true);
+      retarget("heart", true);
     });
     castrow.appendChild(b);
   });
@@ -409,11 +444,11 @@
   autoBtn.addEventListener("click", () => { autoCast = !autoCast; syncAuto(); });
   castrow.appendChild(autoBtn);
   setInterval(() => {
-    if (!autoCast || scene !== "glyph" || document.hidden) return;
+    if (!autoCast || scene !== "heart" || document.hidden) return;
     heroGlyph = CASTS[(CASTS.indexOf(heroGlyph) + 1) % CASTS.length];
     castrow.querySelectorAll(".castbtn").forEach(x => x.classList.toggle("active", x.textContent === heroGlyph));
-    retarget("glyph", true);
-  }, 4200);
+    retarget("heart", true);
+  }, 5200);
 
   /* ================= LIVING SPECIMEN ================= */
   const SPECIMENS = [
@@ -564,6 +599,7 @@
       retarget(r.dataset.scene);
       $("#hud-state").textContent = r.dataset.state;
       $("#hud-room").textContent = "0" + (rooms.indexOf(r) + 1) + " — 05";
+      const ec = $("#excount"); if (ec) ec.textContent = "0" + (rooms.indexOf(r) + 1) + " / 05";
       $("#walklive").textContent = "Now in room " + (rooms.indexOf(r) + 1) + ": " + r.dataset.state.toLowerCase();
       if (r.dataset.scene === "frame" && !specEl._res) castSpecimen();
       if (r.dataset.scene === "dust" && !peaks && !RM) buildAudio().then(() => drawWave(0));
@@ -594,8 +630,7 @@
       (function still() {
         grains.forEach(g => { g.x = lerp(g.x, g.tx, 0.5); g.y = lerp(g.y, g.ty, 0.5); });
         hallMix = computeHallMix();
-        $("#hallbg").style.opacity = hallMix.toFixed(3);
-        document.getElementById("hud").classList.toggle("inverted", hallMix > 0.5);
+        document.getElementById("hud").classList.add("inverted");
         cx.clearRect(0, 0, W, H);
         cx.strokeStyle = hallMix > .5 ? "rgba(239,231,214,.7)" : "rgba(25,22,17,.7)";
         cx.lineWidth = DPR;

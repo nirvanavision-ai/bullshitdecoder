@@ -390,3 +390,54 @@ body:not(.foundry) .uz-item .uz-name { color: #e6e2d8; }
 @media (prefers-reduced-motion: reduce) {
   #focusring { display: none; }
 }
+
+/* =============================================================
+   MUSEUM MODE — the Eidolon treatment as the whole front page.
+   One token remap turns the paper foundry into the Hall of Dust:
+   every component above reads its colours from --f-* tokens, so
+   the museum needs no second component layer. Accent moves from
+   vermilion to Eidolon's amber.
+   ============================================================= */
+body.museum {
+  --f-paper:   #0b0a0c;
+  --f-paper2:  #131117;
+  --f-paper3:  #1b1820;
+  --f-ink:     #efe7d6;
+  --f-ink-soft:#b8b0a3;
+  --f-mute:    #6d675e;
+  --f-line:    rgba(215, 154, 74, 0.16);
+  --f-lineh:   rgba(215, 154, 74, 0.34);
+  --verm:      #d79d4a;
+  --verm-deep: #b47a2f;
+  --verm-wash: rgba(215, 157, 74, 0.10);
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 20%, rgba(215,157,74,.05), transparent 60%),
+    #0b0a0c;
+}
+body.museum::after { /* film grain + vignette, fixed, over everything visual */
+  content: ""; position: fixed; inset: 0; z-index: 3; pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 100% 92% at 50% 50%, transparent 58%, rgba(0,0,0,.45) 100%);
+}
+body.museum ::selection { background: var(--verm); color: #16100a; }
+body.museum ::-webkit-scrollbar { width: 9px; }
+body.museum ::-webkit-scrollbar-thumb { background: rgb(42,38,32); border: 2px solid rgb(6,5,6); border-radius: 9px; }
+body.museum ::-webkit-scrollbar-track { background: rgb(6,5,6); }
+body.museum #hallbg { display: none; } /* the whole page IS the hall now */
+body.museum .plate { box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+body.museum .plate .plate-cap { background: #0b0a0c; }
+body.museum .castbtn.active { color: #16100a; }
+body.museum .recast { background: var(--verm); color: #16100a; }
+body.museum .popcard { background: #efe7d6; color: #191611; }
+body.museum .popcard .pc-tag { color: #b47a2f; }
+body.museum .popcard p { color: #433d33; }
+body.museum .popcard .pc-src { color: #8a8377; }
+body.museum .doorplate.dark { background: var(--f-paper2); }
+body.museum .sitenav { background: rgba(11,10,12,.9); }
+body.museum .hud .val { color: var(--f-ink); }
+body.museum .exhibit-topcap {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .3em; color: var(--f-mute);
+  text-transform: uppercase; margin-left: auto; display: flex; gap: 18px; align-items: center;
+}
+.ex-italic { font-family: var(--display); font-style: italic; font-weight: 500; font-size: 15px; color: var(--verm); }
