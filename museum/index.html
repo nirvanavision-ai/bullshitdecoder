@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Museum of Said Things — a gallery of sentences</title>
+<meta name="description" content="A walk-through gallery of things that were said. Each exhibit is one sentence, assembled from dust and decoded in front of you by the same engine that runs the Decoder.">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="The Museum of Said Things">
+<meta property="og:description" content="A gallery of sentences. Every exhibit is something somebody said.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%23d79d4a%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-family=%27Georgia,serif%27 font-size=%2720%27 font-weight=%27700%27 text-anchor=%27middle%27 fill=%27%2316100a%27%3EM%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/hall.css">
+<style>
+  /* ---- gallery-specific layer. Everything else comes from the shared hall. ---- */
+  #ink { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+
+  .room { position: relative; z-index: 3; min-height: 100vh; display: flex; align-items: center;
+          padding: 90px clamp(18px, 5vw, 64px); }
+  /* The room number lives in the HUD's bottom-left corner, which already
+     tracks it. A second copy in the top-left crowded the nav for no gain. */
+  .room .idx { display: none; }
+
+  /* These plaques carry far more small text than the landing page's do, and at
+     the shared 0.8 alpha the grain field read straight through the label copy.
+     Verified with a pixel probe: stacking was already correct, so this is an
+     opacity fix, not a z-index one. */
+  .room .plaque { background: rgba(12, 10, 9, 0.94); }
+
+  /* stage and plaque share a column height, so the exhibit sits on the same
+     optical line as its label instead of drifting below it */
+  .room .hall-grid { align-items: center; min-height: 74vh; }
+  .room .hall-stage { min-height: 66vh; }
+  .museum-title { font-family: var(--h-display); font-weight: 600; letter-spacing: -.02em;
+                  font-size: clamp(38px, 6.4vw, 82px); line-height: .96; color: var(--h-bone); margin: 10px 0 18px; }
+  .museum-title em { font-style: italic; color: var(--h-amber); }
+
+  /* the quotation itself — the exhibit, set large */
+  .said { font-family: var(--h-display); font-style: italic; font-weight: 400;
+          font-size: clamp(21px, 2.5vw, 30px); line-height: 1.42; color: var(--h-bone);
+          margin: 0 0 16px; text-wrap: balance; }
+  .said::before { content: "\201C"; color: var(--h-amber); }
+  .said::after  { content: "\201D"; color: var(--h-amber); }
+  .said-src { font-family: var(--h-mono); font-size: 9.5px; letter-spacing: .22em;
+              text-transform: uppercase; color: var(--h-bone-faint); }
+
+  /* the engine's verdict, rendered as a museum label */
+  .label-rule { border: none; border-top: 1px solid var(--h-rule); margin: 18px 0 14px; }
+  .verdictline { font-family: var(--h-mono); font-size: 10px; letter-spacing: .2em;
+                 text-transform: uppercase; color: var(--h-amber); margin-bottom: 10px; }
+  .taclist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .taclist li { border-left: 2px solid var(--h-rule); padding-left: 12px; }
+  .tacname { font-family: var(--h-mono); font-size: 10px; letter-spacing: .16em;
+             text-transform: uppercase; color: var(--h-bone); display: block; margin-bottom: 4px; }
+  .tacmech { font-size: 12.5px; line-height: 1.65; color: var(--h-bone-dim); margin: 0; }
+  .tacsrc { font-family: var(--h-mono); font-size: 9px; letter-spacing: .14em;
+            text-transform: uppercase; color: var(--h-bone-faint); }
+  .noflag { font-size: 12.5px; line-height: 1.7; color: var(--h-bone-dim); margin: 0; }
+
+  .say-back { margin-top: 16px; padding: 12px 14px; background: rgba(215,157,74,.06);
+              border: 1px solid var(--h-rule-soft); }
+  .say-back .cap { font-family: var(--h-mono); font-size: 9px; letter-spacing: .22em;
+                   text-transform: uppercase; color: var(--h-bone-faint); display: block; margin-bottom: 6px; }
+  .say-back p { font-size: 13px; line-height: 1.65; color: var(--h-bone); margin: 0; font-style: italic; }
+
+  /* scroll reveal, matching the landing page's easing */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .7s var(--h-ease), transform .7s var(--h-ease); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* fixed HUD, corners */
+  .hud { position: fixed; inset: 0; z-index: 40; pointer-events: none; font-family: var(--h-mono);
+         font-size: 9.5px; letter-spacing: .24em; text-transform: uppercase; color: var(--h-bone-faint); }
+  .hud > div { position: absolute; padding: 18px clamp(18px, 5vw, 64px); }
+  /* the top row clears the site nav rather than printing over it */
+  .hud .tl { top: 46px; left: 0; } .hud .tr { top: 46px; right: 0; text-align: right; }
+  .hud .bl { bottom: 0; left: 0; } .hud .br { bottom: 0; right: 0; text-align: right; }
+  .hud b { color: var(--h-bone); font-weight: 400; }
+
+  .colophon { min-height: 76vh; }
+  .colophon .wrapc { max-width: 62ch; }
+  .colophon p { font-size: 14px; line-height: 1.85; color: var(--h-bone-dim); margin: 0 0 14px; }
+  .doorrow { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
+  .doorrow a { font-family: var(--h-mono); font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+               color: var(--h-bone); text-decoration: none; border: 1px solid var(--h-rule);
+               padding: 12px 18px; transition: background .2s, color .2s; }
+  .doorrow a:hover { background: var(--h-amber); color: var(--h-on-amber); border-color: var(--h-amber); }
+
+  @media (max-width: 960px) { .room { min-height: auto; padding: 70px clamp(18px,5vw,64px); } }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+</head>
+<body class="hall">
+
+<canvas id="ink" aria-hidden="true"></canvas>
+<div id="focusring" aria-hidden="true"></div>
+
+<nav class="sitenav">
+  <a class="brand" href="../">THE BULLSHIT DECODER</a>
+  <div class="navlinks">
+    <a href="../decoder/">Decoder</a>
+    <a href="../museum/" aria-current="page">Museum</a>
+    <a href="../oblivion/">O.B.L.I.V.I.O.N.</a>
+    <a href="../gaslight/">Gaslight Protocols</a>
+  </div>
+  <span class="navtag">local analysis · nothing uploaded</span>
+</nav>
+
+<div class="hud" id="hud" aria-hidden="true">
+  <div class="tl">The Museum of Said Things</div>
+  <div class="tr"><b id="hud-state">ENTERING</b></div>
+  <div class="bl" id="hud-room">01 — 07</div>
+  <div class="br" id="hud-lib">—</div>
+</div>
+
+<p class="walk-live" aria-live="polite" id="walklive"></p>
+
+<main>
+  <!-- ============ 01 · OVERTURE ============ -->
+  <section class="room overture" data-scene="eggplant" data-state="ENTERING">
+    <span class="idx">01</span>
+    <div class="hall-grid">
+      <div class="hall-stage" id="stage-eggplant">
+        <span class="focus-hint">move to carve · press and hold to focus</span>
+      </div>
+      <div>
+        <div class="plaque reveal">
+          <span class="ex-no">Overture</span>
+          <h3 class="museum-title">The Museum<br>of <em>Said</em> Things</h3>
+          <div class="ex-caps">
+            Permanent collection · seven rooms<br>
+            Medium — language, suspended in dust<br>
+            Admission free · nothing is recorded
+          </div>
+          <hr>
+          <p>Museums are built for objects that survive. This one is built for the things that
+             don't: sentences, which land once and then live only in the person they landed on.
+             Every exhibit here is a sentence somebody actually said, held still long enough
+             to be looked at.</p>
+          <p>The emblem assembling beside you is the case mark of the collection. It is made of
+             the same dust as every other exhibit, because it is the same material: something
+             said, taking a shape you can finally point at.</p>
+          <span class="ex-foot">Point-sampled emblem · <span id="grains-eggplant">—</span> grains</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 02–06 · THE EXHIBITS (generated) ============ -->
+  <div id="exhibits"></div>
+
+  <!-- ============ 07 · COLOPHON ============ -->
+  <section class="room colophon" data-scene="margins" data-state="COLOPHON">
+    <span class="idx">07</span>
+    <div class="wrapc">
+      <p class="kicker reveal">Colophon</p>
+      <h2 class="museum-title reveal">Every label<br>was written <em>here</em>.</h2>
+      <p class="reveal">Nothing on the walls of this museum was decided in advance. Each exhibit's label
+         is produced when the page loads, by running the sentence through the same engine that runs the
+         Decoder — the one with <b id="c-classes">—</b> documented classes and <b id="c-sigs">—</b>
+         signatures behind it. If the engine finds nothing, the label says so. A museum that only
+         hangs the sentences it already has a verdict for is not a museum, it is an argument.</p>
+      <p class="reveal">The analysis runs on your device. No sentence you bring here, and no record of
+         your visit, leaves the machine you are reading this on.</p>
+      <div class="doorrow reveal">
+        <a href="../decoder/" data-door>Bring your own sentence</a>
+        <a href="../oblivion/" data-door>The reconstruction</a>
+        <a href="../gaslight/" data-door>The protocols</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="../assets/engine.bundle.js"></script>
+<script src="../assets/js/museum.js"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (s) { return document.querySelector(s); };
+
+  /* =========================================================================
+     THE COLLECTION
+
+     Each entry is one thing that was said. `text` is the exhibit; everything
+     else on the label — the tactic names, the mechanisms, the lineage — is
+     produced at load time by the engine, not written here. That is deliberate:
+     it keeps the museum honest, and it means swapping the collection is a
+     matter of replacing this array and nothing else.
+
+     >>> THE EGGPLANT FILES <<<
+     These five are the project's own worked examples, standing in until the
+     real transcript lines are dropped in. To swap the collection, replace
+     `text` and `src` below — room count, shapes, plaques and labels all follow
+     automatically. Nothing else in this file needs to change.
+     ========================================================================= */
+  var COLLECTION = [
+    {
+      shape: "quote",
+      state: "EXHIBIT I",
+      title: "The Correction",
+      text: "Nothing is wrong with it. You're just being sensitive.",
+      src: "Worked example · reality-testing family",
+      note: "Two sentences, two jobs. The first closes the question; the second explains why " +
+            "you asked it. Neither one is about the thing you brought up."
+    },
+    {
+      shape: "question",
+      state: "EXHIBIT II",
+      title: "The Reversal",
+      text: "Listen to yourself. Look at how you're acting. I'm the one being calm here.",
+      src: "Worked example · blame family",
+      note: "The subject changes from what happened to how you are behaving while raising it. " +
+            "Composure becomes the evidence, and whoever is more upset is by definition wrong."
+    },
+    {
+      shape: "amp",
+      state: "EXHIBIT III",
+      title: "The Alibi",
+      text: "I was just trying to help her. It's not mine. You're making it into something.",
+      src: "Worked example · altruistic-alibi",
+      note: "A motive is supplied before anyone asked for one, and it is a generous motive. " +
+            "Disputing the account now means disputing the generosity."
+    },
+    {
+      shape: "bang",
+      state: "EXHIBIT IV",
+      title: "The Pre-emption",
+      text: "Everyone already knows how you get. Nobody's going to believe that.",
+      src: "Worked example · preemptive-discredit",
+      note: "Filed before the account exists, so that the account arrives already answered. " +
+            "The audience is not in the room, which is what makes it work."
+    },
+    {
+      shape: "ellipsis",
+      state: "EXHIBIT V",
+      title: "The Close",
+      text: "Anyway. Can you grab milk on the way back?",
+      src: "Worked example · pattern interrupt",
+      note: "The conversation ends without ending. Nothing was conceded, nothing was resolved, " +
+            "and asking again later will now read as bringing it up again."
+    }
+  ];
+
+  var ROOMS = COLLECTION.length + 2;
+
+  /* ---------- library counters, measured not advertised ---------- */
+  var E = window.DecoderEngine;
+  if (E) {
+    var sigs = E.TAXONOMY.reduce(function (n, t) { return n + t.patterns.length; }, 0);
+    $("#hud-lib").textContent = E.TAXONOMY.length + " CLASSES · " + sigs + " SIGNATURES";
+    $("#c-classes").textContent = E.TAXONOMY.length;
+    $("#c-sigs").textContent = sigs;
+  }
+
+  var esc = function (s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  };
+
+  /* ---------- build a label from what the engine actually found ---------- */
+  function labelFor(text) {
+    if (!E) return '<p class="noflag">The engine did not load, so this label is blank. ' +
+                   'That is the correct behaviour: nothing is asserted that was not measured.</p>';
+    var r = E.analyze(text);
+    var out = '<div class="verdictline">' + esc(r.read.headline) +
+              ' · pressure ' + r.read.composite + '/100</div>';
+
+    if (!r.hits.length && !r.structural.length) {
+      return out + '<p class="noflag">No documented pattern matched this sentence. It is hung ' +
+                   'anyway. Not everything that hurt was a tactic, and the collection would be ' +
+                   'dishonest if it only contained sentences the engine could name.</p>';
+    }
+
+    var seen = {}, items = [];
+    r.hits.forEach(function (h) {
+      if (seen[h.tacticId]) return;
+      seen[h.tacticId] = 1;
+      var t = r.tacticsById[h.tacticId];
+      items.push('<li><span class="tacname">' + esc(t.label) + '</span>' +
+                 '<p class="tacmech">' + esc(t.mechanism.split(". ")[0]) + '.</p>' +
+                 '<span class="tacsrc">' + esc(t.lineage) + '</span></li>');
+    });
+    r.structural.forEach(function (s) {
+      items.push('<li><span class="tacname">' + esc(s.label) + '</span>' +
+                 '<p class="tacmech">' + esc(s.why) + '</p>' +
+                 '<span class="tacsrc">Structural finding</span></li>');
+    });
+    out += '<ul class="taclist">' + items.join("") + '</ul>';
+
+    // the museum's one piece of practical advice, taken from the engine
+    var first = r.hits.length ? r.tacticsById[r.hits[0].tacticId] : null;
+    if (first && first.scripts && first.scripts.length) {
+      out += '<div class="say-back"><span class="cap">You can say</span><p>' +
+             esc(first.scripts[0]) + '</p></div>';
+    }
+    return out;
+  }
+
+  /* ---------- lay the rooms out ---------- */
+  var host = $("#exhibits");
+  var ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
+  COLLECTION.forEach(function (ex, i) {
+    var n = i + 2;
+    var sec = document.createElement("section");
+    sec.className = "room";
+    sec.dataset.scene = ex.shape;
+    sec.dataset.state = ex.state || ("EXHIBIT " + ROMAN[i]);
+    sec.innerHTML =
+      '<span class="idx">' + (n < 10 ? "0" + n : n) + '</span>' +
+      '<div class="hall-grid">' +
+        '<div class="hall-stage" id="stage-' + ex.shape + '">' +
+          '<span class="focus-hint">move to carve · press and hold to focus</span>' +
+        '</div>' +
+        '<div><div class="plaque reveal">' +
+          '<span class="ex-no">Exhibit ' + ROMAN[i] + '</span>' +
+          '<h3>' + esc(ex.title) + '</h3>' +
+          '<p class="said">' + esc(ex.text) + '</p>' +
+          '<span class="said-src">' + esc(ex.src) + '</span>' +
+          '<hr class="label-rule">' +
+          '<p class="tacmech" style="margin-bottom:14px">' + esc(ex.note) + '</p>' +
+          labelFor(ex.text) +
+        '</div></div>' +
+      '</div>';
+    host.appendChild(sec);
+  });
+
+  /* ---------- the grain engine ---------- */
+  var eng = window.Museum.mount({
+    canvas: "ink",
+    stageFor: function (name) { return document.getElementById("stage-" + name); },
+    onRetarget: function (name, count) {
+      var el = document.getElementById("grains-" + name);
+      if (el) el.textContent = count.toLocaleString();
+    },
+    onFocus: function (on) { $("#hud-state").textContent = on ? "FOCUSING" : "VIEWING"; }
+  });
+
+  /* ---------- walking between rooms ---------- */
+  var rooms = [].slice.call(document.querySelectorAll(".room"));
+  var sceneIO = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var r = e.target, i = rooms.indexOf(r);
+      eng.retarget(r.dataset.scene);
+      $("#hud-state").textContent = r.dataset.state;
+      var num = (i + 1 < 10 ? "0" : "") + (i + 1);
+      $("#hud-room").textContent = num + " — 0" + ROOMS;
+      $("#walklive").textContent = "Room " + (i + 1) + " of " + ROOMS + ": " +
+        r.dataset.state.toLowerCase();
+    });
+  }, { rootMargin: "-42% 0px -42% 0px" });
+  rooms.forEach(function (r) { sceneIO.observe(r); });
+
+  var revealIO = new IntersectionObserver(function (es) {
+    es.forEach(function (e) { e.target.classList.toggle("in", e.isIntersecting); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll(".reveal").forEach(function (el) { revealIO.observe(el); });
+
+  document.querySelectorAll("[data-door]").forEach(function (a) {
+    a.addEventListener("click", function (e) {
+      if (eng.reduced) return;
+      e.preventDefault();
+      document.body.classList.add("depart");
+      setTimeout(function () { location.href = a.href; }, 430);
+    });
+  });
+})();
+</script>
+</body>
+</html>

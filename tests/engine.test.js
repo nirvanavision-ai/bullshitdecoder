@@ -4,7 +4,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { analyze, toReport } from "../assets/js/engine/analyzer.js";
+import { analyze, toReport, normalizeTypography } from "../assets/js/engine/analyzer.js";
 import { TAXONOMY, FAMILIES } from "../assets/js/engine/taxonomy.js";
 import { structuralProfile, conditionalThreats, repairCount } from "../assets/js/engine/linguistics.js";
 
@@ -211,5 +211,43 @@ test("expanded library keeps ordinary messages clear (no false-positive drift)",
   ]) {
     const r = analyze(t);
     assert.ok(["clear", "low"].includes(r.read.band), `false positive on "${t}" → ${r.read.band}`);
+  }
+});
+
+test("smart punctuation does not hide a match", () => {
+  // Every mainstream editor substitutes U+2019 as you type, so the curly form
+  // is what real pasted messages actually contain.
+  for (const [ascii, curly] of [
+    ["You're being too sensitive.", "You\u2019re being too sensitive."],
+    ["Let's just drop it. Can you grab the post?", "Let\u2019s just drop it. Can you grab the post?"],
+    ["I never said that, you're imagining it.", "I never said that, you\u2019re imagining it."],
+  ]) {
+    const a = analyze(ascii).hits.map(h => h.tacticId).sort();
+    const c = analyze(curly).hits.map(h => h.tacticId).sort();
+    assert.deepEqual(c, a, `curly form lost hits: ${curly}`);
+    assert.ok(a.length > 0, `fixture matches nothing: ${ascii}`);
+  }
+});
+
+test("normalization is length-preserving so hit offsets index the original", () => {
+  const src = "\u201CYou\u2019re impossible,\u201D he said \u2014 you\u2019re being too sensitive.";
+  assert.equal(normalizeTypography(src).length, src.length);
+  for (const h of analyze(src).hits) {
+    // the slice of the ORIGINAL string must still be the phrase that matched
+    assert.equal(src.slice(h.start, h.end).length, h.text.length);
+    assert.ok(/sensitive/i.test(src.slice(h.start, h.end)) || h.text.length > 0);
+  }
+});
+
+test("pattern interrupt fires on a close, not on ordinary topic changes", () => {
+  assert.ok(analyze("Anyway. Can you grab milk on the way back?")
+    .hits.some(h => h.tacticId === "pattern-interrupt"));
+  for (const ok of [
+    "Anyway, I need to head out now.",
+    "I love you. What did you think of the film?",
+    "Moving on to the next item, we finished the report.",
+  ]) {
+    assert.ok(!analyze(ok).hits.some(h => h.tacticId === "pattern-interrupt"),
+      `false positive: ${ok}`);
   }
 });

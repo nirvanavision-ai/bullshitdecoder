@@ -900,11 +900,11 @@ const TAXONOMY = [
       "you later show is then read by everyone as confirmation.",
     patterns: [
       /i'?ve been (?:so |really )?worried about (?:you|her|him|them)\b[^.!?\n]*/gi,
-      /(?:everyone|they|people) (?:already )?(?:knows?|can see) (?:how|what) you(?:'?re| are)\b[^.!?\n]*/gi,
+      /(?:everyone|they|people) (?:already )?(?:knows?|can see) (?:how|what) you(?:'?re| are|'?ve been| get| act| behave)\b[^.!?\n]*/gi,
       /i'?ve had to (?:cover for|explain|apologi[sz]e for) you\b[^.!?\n]*/gi,
       /i (?:didn'?t|haven'?t) told (?:them|anyone) (?:everything|the whole story)\b[^.!?\n]*/gi,
       /(?:they|everyone) (?:think|thinks) you'?re (?:unstable|difficult|too much|unwell)\b[^.!?\n]*/gi,
-      /no one would believe you (?:anyway|over me)\b[^.!?\n]*/gi,
+      /(?:no one|nobody|no-one)(?:'?s| is| would| will|'?s going to| is going to) (?:ever )?(?:going to )?believe (?:you|that|any of (?:this|that))\b[^.!?\n]*/gi,
     ],
     scripts: [
       "If you have concerns about me, say them to me — not about me.",
@@ -934,6 +934,37 @@ const TAXONOMY = [
       "Your reputation isn't in question. The event is.",
       "Good deeds elsewhere don't answer what I asked.",
     ],
+  },
+  {
+    id: "pattern-interrupt",
+    label: "Pattern interrupt",
+    family: "boundary",
+    severity: 2,
+    lineage:
+      "Topic-shift and 'stonewalling-lite' repair failure (Gottman); conversational-floor control " +
+      "in discourse analysis (Sacks, Schegloff & Jefferson turn-taking).",
+    mechanism:
+      "A serious conversation is ended by a trivial one, so the unresolved issue is declared closed without " +
+      "anyone conceding anything. Nothing is refused and nothing is answered — the floor simply moves, and " +
+      "raising the matter again later reads as dredging it up rather than continuing it. The debt compounds " +
+      "because each interrupt makes the next attempt look more unreasonable than the last.",
+    patterns: [
+      /\b(?:anyway|anyways|whatever)\b[^.!?\n]{0,10}[.,]?\s*(?:can|could|would|will) you\b[^.!?\n]*/gi,
+      /\blet'?s (?:just )?(?:drop|leave) (?:it|this)\b[^.!?\n]*/gi,
+      /\bcan we (?:just )?not (?:do this|talk about (?:it|this))\b[^.!?\n]*/gi,
+      /\b(?:moving on|forget it|never ?mind)\b[^.!?\n]{0,6}[.,]?\s*(?:what|can|are|did|do) (?:you|we)\b[^.!?\n]*/gi,
+      /\bi don'?t want to (?:fight|argue) about (?:it|this)\b[^.!?\n]{0,40}\b(?:what|can|are) (?:you|we)\b[^.!?\n]*/gi,
+      /\bare we (?:done|good)\b[^.!?\n]{0,20}\?/gi,
+    ],
+    scripts: [
+      "I'm happy to get to that. I want to finish this first.",
+      "We can pause it, but I'm not treating it as settled.",
+      "Changing the subject isn't the same as us agreeing.",
+    ],
+    note:
+      "Ordinary conversations change subject constantly, and most topic shifts mean nothing. This only " +
+      "registers as a pattern when the shift lands on an open question — which is why it carries low " +
+      "weight on its own and matters mainly in aggregate.",
   },
 ];
 
@@ -1124,6 +1155,34 @@ function structuralProfile(text) {
 
 const SEVERITY_WEIGHT = { 1: 4, 2: 9, 3: 16 };
 
+/**
+ * Typographic normalization, applied before signatures run.
+ *
+ * Almost every real message arriving here has been through an editor that
+ * substitutes smart punctuation — iOS, macOS, Word, Google Docs all turn ' into
+ * U+2019 as you type. The taxonomy is written with ASCII apostrophes, so before
+ * this existed a pattern like /let'?s/ matched "lets" and "let's" and silently
+ * missed "let’s" — which is the form the overwhelming majority of pasted
+ * messages actually use. That is a whole-library failure, not a per-pattern one.
+ *
+ * Every substitution here is deliberately ONE character for ONE character, so
+ * `hit.start` / `hit.end` still index the caller's original string and the UI
+ * can keep highlighting the real text. That rules out expanding the ellipsis
+ * (U+2026 -> "...") — patterns must match … directly instead.
+ */
+const TYPO_MAP = {
+  "\u2018": "'", "\u2019": "'", "\u201A": "'", "\u201B": "'", "\u2032": "'", "\u00B4": "'",
+  "\u201C": '"', "\u201D": '"', "\u201E": '"', "\u201F": '"', "\u2033": '"',
+  "\u2010": "-", "\u2011": "-", "\u2012": "-", "\u2013": "-", "\u2014": "-", "\u2212": "-",
+  "\u00A0": " ", "\u2007": " ", "\u202F": " ", "\u2009": " ",
+};
+const TYPO_RE = new RegExp("[" + Object.keys(TYPO_MAP).join("") + "]", "g");
+
+/** Fold smart punctuation to ASCII without changing string length. */
+function normalizeTypography(text) {
+  return String(text).replace(TYPO_RE, ch => TYPO_MAP[ch]);
+}
+
 /** Run every signature and return raw, possibly-overlapping hits. */
 function signaturePass(text) {
   const hits = [];
@@ -1283,9 +1342,13 @@ function analyze(text) {
     };
   }
 
-  const profile = structuralProfile(clean);
-  const hits = resolveOverlaps(signaturePass(clean));
-  const structural = structuralFindings(clean, profile);
+  // Signatures and structural findings run against the folded text so smart
+  // punctuation cannot hide a match; offsets stay valid because the fold is
+  // strictly one-for-one. `clean` is still what gets reported back.
+  const folded = normalizeTypography(clean);
+  const profile = structuralProfile(folded);
+  const hits = resolveOverlaps(signaturePass(folded));
+  const structural = structuralFindings(folded, profile);
 
   const safety = [];
   for (const re of SAFETY_SIGNALS) {

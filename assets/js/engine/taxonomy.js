@@ -898,11 +898,11 @@ export const TAXONOMY = [
       "you later show is then read by everyone as confirmation.",
     patterns: [
       /i'?ve been (?:so |really )?worried about (?:you|her|him|them)\b[^.!?\n]*/gi,
-      /(?:everyone|they|people) (?:already )?(?:knows?|can see) (?:how|what) you(?:'?re| are)\b[^.!?\n]*/gi,
+      /(?:everyone|they|people) (?:already )?(?:knows?|can see) (?:how|what) you(?:'?re| are|'?ve been| get| act| behave)\b[^.!?\n]*/gi,
       /i'?ve had to (?:cover for|explain|apologi[sz]e for) you\b[^.!?\n]*/gi,
       /i (?:didn'?t|haven'?t) told (?:them|anyone) (?:everything|the whole story)\b[^.!?\n]*/gi,
       /(?:they|everyone) (?:think|thinks) you'?re (?:unstable|difficult|too much|unwell)\b[^.!?\n]*/gi,
-      /no one would believe you (?:anyway|over me)\b[^.!?\n]*/gi,
+      /(?:no one|nobody|no-one)(?:'?s| is| would| will|'?s going to| is going to) (?:ever )?(?:going to )?believe (?:you|that|any of (?:this|that))\b[^.!?\n]*/gi,
     ],
     scripts: [
       "If you have concerns about me, say them to me — not about me.",
@@ -932,6 +932,37 @@ export const TAXONOMY = [
       "Your reputation isn't in question. The event is.",
       "Good deeds elsewhere don't answer what I asked.",
     ],
+  },
+  {
+    id: "pattern-interrupt",
+    label: "Pattern interrupt",
+    family: "boundary",
+    severity: 2,
+    lineage:
+      "Topic-shift and 'stonewalling-lite' repair failure (Gottman); conversational-floor control " +
+      "in discourse analysis (Sacks, Schegloff & Jefferson turn-taking).",
+    mechanism:
+      "A serious conversation is ended by a trivial one, so the unresolved issue is declared closed without " +
+      "anyone conceding anything. Nothing is refused and nothing is answered — the floor simply moves, and " +
+      "raising the matter again later reads as dredging it up rather than continuing it. The debt compounds " +
+      "because each interrupt makes the next attempt look more unreasonable than the last.",
+    patterns: [
+      /\b(?:anyway|anyways|whatever)\b[^.!?\n]{0,10}[.,]?\s*(?:can|could|would|will) you\b[^.!?\n]*/gi,
+      /\blet'?s (?:just )?(?:drop|leave) (?:it|this)\b[^.!?\n]*/gi,
+      /\bcan we (?:just )?not (?:do this|talk about (?:it|this))\b[^.!?\n]*/gi,
+      /\b(?:moving on|forget it|never ?mind)\b[^.!?\n]{0,6}[.,]?\s*(?:what|can|are|did|do) (?:you|we)\b[^.!?\n]*/gi,
+      /\bi don'?t want to (?:fight|argue) about (?:it|this)\b[^.!?\n]{0,40}\b(?:what|can|are) (?:you|we)\b[^.!?\n]*/gi,
+      /\bare we (?:done|good)\b[^.!?\n]{0,20}\?/gi,
+    ],
+    scripts: [
+      "I'm happy to get to that. I want to finish this first.",
+      "We can pause it, but I'm not treating it as settled.",
+      "Changing the subject isn't the same as us agreeing.",
+    ],
+    note:
+      "Ordinary conversations change subject constantly, and most topic shifts mean nothing. This only " +
+      "registers as a pattern when the shift lands on an open question — which is why it carries low " +
+      "weight on its own and matters mainly in aggregate.",
   },
 ];
 

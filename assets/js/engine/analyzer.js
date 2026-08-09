@@ -21,6 +21,34 @@ import { structuralProfile } from "./linguistics.js";
 
 const SEVERITY_WEIGHT = { 1: 4, 2: 9, 3: 16 };
 
+/**
+ * Typographic normalization, applied before signatures run.
+ *
+ * Almost every real message arriving here has been through an editor that
+ * substitutes smart punctuation — iOS, macOS, Word, Google Docs all turn ' into
+ * U+2019 as you type. The taxonomy is written with ASCII apostrophes, so before
+ * this existed a pattern like /let'?s/ matched "lets" and "let's" and silently
+ * missed "let’s" — which is the form the overwhelming majority of pasted
+ * messages actually use. That is a whole-library failure, not a per-pattern one.
+ *
+ * Every substitution here is deliberately ONE character for ONE character, so
+ * `hit.start` / `hit.end` still index the caller's original string and the UI
+ * can keep highlighting the real text. That rules out expanding the ellipsis
+ * (U+2026 -> "...") — patterns must match … directly instead.
+ */
+const TYPO_MAP = {
+  "\u2018": "'", "\u2019": "'", "\u201A": "'", "\u201B": "'", "\u2032": "'", "\u00B4": "'",
+  "\u201C": '"', "\u201D": '"', "\u201E": '"', "\u201F": '"', "\u2033": '"',
+  "\u2010": "-", "\u2011": "-", "\u2012": "-", "\u2013": "-", "\u2014": "-", "\u2212": "-",
+  "\u00A0": " ", "\u2007": " ", "\u202F": " ", "\u2009": " ",
+};
+const TYPO_RE = new RegExp("[" + Object.keys(TYPO_MAP).join("") + "]", "g");
+
+/** Fold smart punctuation to ASCII without changing string length. */
+export function normalizeTypography(text) {
+  return String(text).replace(TYPO_RE, ch => TYPO_MAP[ch]);
+}
+
 /** Run every signature and return raw, possibly-overlapping hits. */
 function signaturePass(text) {
   const hits = [];
@@ -180,9 +208,13 @@ export function analyze(text) {
     };
   }
 
-  const profile = structuralProfile(clean);
-  const hits = resolveOverlaps(signaturePass(clean));
-  const structural = structuralFindings(clean, profile);
+  // Signatures and structural findings run against the folded text so smart
+  // punctuation cannot hide a match; offsets stay valid because the fold is
+  // strictly one-for-one. `clean` is still what gets reported back.
+  const folded = normalizeTypography(clean);
+  const profile = structuralProfile(folded);
+  const hits = resolveOverlaps(signaturePass(folded));
+  const structural = structuralFindings(folded, profile);
 
   const safety = [];
   for (const re of SAFETY_SIGNALS) {
