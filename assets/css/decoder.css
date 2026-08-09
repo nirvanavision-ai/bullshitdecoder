@@ -285,54 +285,66 @@ footer.foot .disclaimer { color: var(--paper-faint); font-size: 12.5px; }
 }
 
 /* =============================================================
-   PAPER RE-THEME — the Decoder joins the foundry system.
-   Token override only: the component layer above stays untouched,
-   which is the point of having tokens. Severity hues re-picked
-   for AA contrast on bone.
+   HALL RE-THEME — the Decoder joins the Hall of Dust.
+
+   This block replaces the earlier paper re-theme. Same mechanism,
+   different destination: token override only, so the whole
+   component layer above stays untouched. That is the entire point
+   of having tokens, and it is why moving the Decoder from warm
+   paper to the hall is forty lines rather than a rewrite.
+
+   Severity hues re-picked for the dark ground. The brief above
+   still holds — calm authority, no klaxons — so severity climbs
+   through ash, amber, sienna rather than toward fire-engine red.
    ============================================================= */
 :root {
-  --ink:        #f3f0e8;   /* page ground (was near-black) */
-  --ink-2:      #faf8f2;   /* panels */
-  --ink-3:      #ebe6d9;   /* insets */
-  --line:       #d5cdba;
-  --line-soft:  #e2dccc;
-  --paper:      #191611;   /* primary text (was bone) */
-  --paper-dim:  #4a443a;
-  --paper-faint:#8a8377;
+  --ink:        #0b0a0c;   /* page ground — the hall */
+  --ink-2:      #131117;   /* panels */
+  --ink-3:      #1b1820;   /* insets */
+  --line:       rgba(215, 154, 74, 0.18);
+  --line-soft:  rgba(215, 154, 74, 0.10);
+  --paper:      #efe7d6;   /* primary text — bone */
+  --paper-dim:  #b8b0a3;
+  --paper-faint:#6d675e;
 
-  --accent:     #d63d1e;   /* vermilion replaces teal */
-  --accent-ink: #ffffff;
-  --sev-1:      #3d6ca8;
-  --sev-2:      #9a6a0a;
-  --sev-3:      #bb2c10;
-  --safe:       #7c5a10;
+  --accent:     #d79d4a;   /* the hall's amber replaces vermilion */
+  --accent-ink: #16100a;
+  --sev-1:      #9c8e77;   /* concerning — ash */
+  --sev-2:      #d79d4a;   /* serious — amber */
+  --sev-3:      #c9552e;   /* critical — sienna */
+  --safe:       #e8bd7f;
 
   --serif: "Fraunces", "Newsreader", Georgia, serif;
 }
 body {
   background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(214,61,30,.04) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 55% at 50% 18%, rgba(215, 157, 74, .05), transparent 60%),
     var(--ink);
+  background-attachment: fixed;
 }
-.mark { background: var(--accent); color: #fff; }
+/* page content rides above the dust layer (hall.css, z-index 0) */
+.sitenav, header.masthead, main.wrap, footer.foot { position: relative; z-index: 1; }
+
+.mark { background: var(--accent); color: var(--accent-ink); }
 .masthead .tag::before { background: var(--accent); }
-.hero .privacy { color: var(--accent); background: rgba(214,61,30,.07); border-color: rgba(214,61,30,.3); }
-textarea#input { background: var(--ink-2); box-shadow: inset 0 1px 3px rgba(25,22,17,.06); }
-textarea#input:focus { box-shadow: 0 0 0 4px rgba(214,61,30,.12); }
-button.primary:hover { background: #e5502f; box-shadow: 0 6px 22px rgba(214,61,30,.25); }
+.hero .privacy { color: var(--accent); background: rgba(215,157,74,.08); border-color: rgba(215,157,74,.32); }
+textarea#input { background: var(--ink-2); box-shadow: inset 0 1px 3px rgba(0,0,0,.35); }
+textarea#input:focus { box-shadow: 0 0 0 4px rgba(215,157,74,.16); }
+button.primary { color: var(--accent-ink); }
+button.primary:hover { background: #e8bd7f; box-shadow: 0 6px 22px rgba(215,157,74,.22); }
 .verdict { background: var(--ink-2); }
-.verdict[data-band="clear"] { --band: #2e7d5b; }
+.verdict[data-band="clear"] { --band: #7f9e6d; }
 .indices .fill { background: linear-gradient(90deg, var(--sev-1), var(--sev-2) 60%, var(--sev-3)); }
-.annotated mark[data-sev="1"] { background: rgba(61,108,168,.12); }
-.annotated mark[data-sev="2"] { background: rgba(154,106,10,.12); }
-.annotated mark[data-sev="3"] { background: rgba(187,44,16,.10); }
-.safety { border-color: rgba(124,90,16,.45); background: rgba(154,106,10,.07); }
-.safety p, .safety ul { color: #55431a; }
-.safety h3, .safety a { color: #7c5a10; }
-.drawer { background: var(--ink-2); box-shadow: -30px 0 80px rgba(25,22,17,.18); }
+.annotated mark[data-sev="1"] { background: rgba(156,142,119,.16); }
+.annotated mark[data-sev="2"] { background: rgba(215,157,74,.16); }
+.annotated mark[data-sev="3"] { background: rgba(201,85,46,.18); }
+.safety { border-color: rgba(215,157,74,.4); background: rgba(215,157,74,.07); }
+.safety p, .safety ul { color: var(--paper-dim); }
+.safety h3, .safety a { color: var(--safe); }
+.drawer { background: var(--ink-2); box-shadow: -30px 0 80px rgba(0,0,0,.55); }
 .drawer .note, .script { background: var(--ink-3); }
 .drawer p { color: var(--paper-dim); }
 .script .s, .script { color: var(--paper); }
-.scrim { background: rgba(25, 22, 17, 0.35); }
+.scrim { background: rgba(6, 5, 6, 0.6); }
 .finding { background: var(--ink-2); }
 footer.foot a { color: var(--paper-dim); }

@@ -41,20 +41,37 @@ const bundle = [
    while still reporting success. That shipped once; the guards below exist so it
    cannot ship twice. */
 const TEMPLATE = "src/page.html";
-const CSS_TAG = '<link rel="stylesheet" href="assets/css/decoder.css">';
-const JS_TAG = '<script type="module" src="assets/js/ui/app.js"></script>';
+
+/* Every external asset the page pulls from the repo gets inlined. The Hall of
+   Dust arrived as two more of them (hall.css, dust.js); leaving those linked
+   would have shipped a "standalone" file that renders in the old palette
+   wherever ../assets/ isn't reachable. */
+const INLINE = [
+  ['<link rel="stylesheet" href="../assets/css/site.css">',
+   () => `<style>\n${read("assets/css/site.css")}\n</style>`],
+  ['<link rel="stylesheet" href="../assets/css/hall.css">',
+   () => `<style>\n${read("assets/css/hall.css")}\n</style>`],
+  ['<link rel="stylesheet" href="assets/css/decoder.css">',
+   () => `<style>\n${read("assets/css/decoder.css")}\n</style>`],
+  ['<script src="../assets/js/dust.js"></script>',
+   () => `<script>\n${read("assets/js/dust.js")}\n</script>`],
+  ['<script src="../assets/js/vault.js"></script>',
+   () => `<script>\n${read("assets/js/vault.js")}\n</script>`],
+  ['<script src="../assets/js/upload.js"></script>',
+   () => `<script>\n${read("assets/js/upload.js")}\n</script>`],
+  ['<script type="module" src="assets/js/ui/app.js"></script>',
+   () => `<script>\n${bundle}\n</script>`],
+];
 
 const template = read(TEMPLATE);
-for (const [tag, name] of [[CSS_TAG, "stylesheet link"], [JS_TAG, "module script"]]) {
+for (const [tag] of INLINE) {
   if (!template.includes(tag)) {
-    console.error(`✗ ${TEMPLATE} is missing its ${name} placeholder — nothing would be inlined.`);
+    console.error(`✗ ${TEMPLATE} is missing its placeholder: ${tag}`);
     process.exit(1);
   }
 }
 
-const html = template
-  .replace(CSS_TAG, () => `<style>\n${read("assets/css/decoder.css")}\n</style>`)
-  .replace(JS_TAG, () => `<script>\n${bundle}\n</script>`);
+const html = INLINE.reduce((acc, [tag, fill]) => acc.replace(tag, fill), template);
 
 writeFileSync(join(ROOT, "decoder", "index.html"), html);
 
@@ -78,6 +95,12 @@ const classes = (read("assets/js/engine/taxonomy.js").match(/^\s{4}id: "/gm) || 
 const inlined = (html.match(/^\s{4}id: "/gm) || []).length;
 if (inlined !== classes) {
   console.error(`✗ build stale: taxonomy has ${classes} classes but output has ${inlined}`);
+  process.exit(1);
+}
+// Guard 3: "self-contained" has to be true. Nothing may still point into ../assets.
+const leaks = (html.match(/(?:href|src)="\.\.?\/assets\/[^"]+"/g) || []);
+if (leaks.length) {
+  console.error(`✗ build not self-contained: still links ${leaks.join(", ")}`);
   process.exit(1);
 }
 console.log(`✓ decoder/index.html — ${(html.length / 1024).toFixed(1)} KB, self-contained`);

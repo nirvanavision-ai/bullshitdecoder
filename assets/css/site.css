@@ -397,8 +397,14 @@ body:not(.foundry) .uz-item .uz-name { color: #e6e2d8; }
    every component above reads its colours from --f-* tokens, so
    the museum needs no second component layer. Accent moves from
    vermilion to Eidolon's amber.
+
+   `body.hall` rides the same remap. The three consoles carry that
+   class and use exactly one foundry component — the site nav — so
+   rather than restate the palette in hall.css and let two copies
+   drift, the remap simply answers to both names.
    ============================================================= */
-body.museum {
+body.museum,
+body.hall {
   --f-paper:   #0b0a0c;
   --f-paper2:  #131117;
   --f-paper3:  #1b1820;
@@ -434,7 +440,8 @@ body.museum .popcard .pc-tag { color: #b47a2f; }
 body.museum .popcard p { color: #433d33; }
 body.museum .popcard .pc-src { color: #8a8377; }
 body.museum .doorplate.dark { background: var(--f-paper2); }
-body.museum .sitenav { background: rgba(11,10,12,.9); }
+body.museum .sitenav,
+body.hall .sitenav { background: rgba(11,10,12,.9); }
 body.museum .hud .val { color: var(--f-ink); }
 body.museum .exhibit-topcap {
   font-family: var(--mono); font-size: 10px; letter-spacing: .3em; color: var(--f-mute);

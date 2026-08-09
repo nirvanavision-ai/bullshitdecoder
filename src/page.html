@@ -9,14 +9,16 @@
 <meta property="og:title" content="Deception Decoder">
 <meta property="og:description" content="A private, browser-based tool for naming manipulation patterns in text.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%236ee7c0'/%3E%3Ctext x='16' y='23' font-family='system-ui,sans-serif' font-size='20' font-weight='700' text-anchor='middle' fill='%2308201a'%3ED%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23d79d4a'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='20' font-weight='700' text-anchor='middle' fill='%2316100a'%3ED%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..700&family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/decoder.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/site.css">
+<link rel="stylesheet" href="../assets/css/hall.css">
+<link rel="stylesheet" href="assets/css/decoder.css">
 </head>
-<body>
+<body class="hall">
+<canvas id="dust" aria-hidden="true"></canvas>
 <nav class="sitenav">
   <a class="brand" href="../">THE BULLSHIT DECODER</a>
   <div class="navlinks">
@@ -123,6 +125,7 @@
     Nothing is sent to a server either way.
   </div>
 </noscript>
+<script src="../assets/js/dust.js"></script>
 <script src="../assets/js/vault.js"></script>
 <script src="../assets/js/upload.js"></script>
 <script>

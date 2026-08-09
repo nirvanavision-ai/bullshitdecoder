@@ -9,10 +9,595 @@
 <meta property="og:title" content="Deception Decoder">
 <meta property="og:description" content="A private, browser-based tool for naming manipulation patterns in text.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%236ee7c0'/%3E%3Ctext x='16' y='23' font-family='system-ui,sans-serif' font-size='20' font-weight='700' text-anchor='middle' fill='%2308201a'%3ED%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23d79d4a'/%3E%3Ctext x='16' y='23' font-family='Georgia,serif' font-size='20' font-weight='700' text-anchor='middle' fill='%2316100a'%3ED%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..700&family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+/* =============================================================
+   THE BULLSHIT DECODER — foundry paper system
+
+   Visual language after the Glyph Foundry study: warm bone paper,
+   ink-black editorial serif, one vermilion accent, letter-spaced
+   mono HUD captions, hairline rules. Type as matter; language as
+   evidence. The landing is a bright gallery you walk through; the
+   consoles remain dark instrument rooms — plates viewed in
+   controlled light — framed by this same paper chrome.
+   ============================================================= */
+
+:root {
+  --f-paper:      #f3f0e8;
+  --f-paper2:    #faf8f2;
+  --f-paper3:    #ebe6d9;
+  --f-ink:        #191611;
+  --f-ink-soft:   #433d33;
+  --f-mute:       #8a8377;
+  --f-line:       #ddd6c6;
+  --f-lineh:  #c5bda9;
+  --verm:       #d63d1e;
+  --verm-deep:  #a92f15;
+  --verm-wash:  rgba(214, 61, 30, 0.08);
+
+  --display: "Fraunces", "Georgia", "Times New Roman", serif;
+  --sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --f-measure: 62ch;
+}
+
+/* ---------- foundry base (landing) ---------- */
+body.foundry {
+  margin: 0; background: var(--f-paper); color: var(--f-ink);
+  font-family: var(--sans); line-height: 1.65;
+  min-height: 100vh; overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+body.foundry ::selection { background: var(--f-ink); color: var(--f-paper); }
+body.foundry :focus-visible { outline: 2px solid var(--verm); outline-offset: 3px; }
+
+/* ink sits ABOVE the hall backdrop — the grains must survive the inversion */
+#ink { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+
+/* ---------- shared nav — the paper frame on every page ---------- */
+.sitenav {
+  position: relative; z-index: 40;
+  display: flex; align-items: center; gap: 26px; flex-wrap: wrap;
+  padding: 16px clamp(18px, 4vw, 40px);
+  border-bottom: 1px solid var(--f-line);
+  background: var(--f-paper);
+  font-family: var(--mono);
+}
+.sitenav .brand {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.22em; color: var(--f-ink);
+  text-decoration: none; white-space: nowrap;
+}
+.sitenav .brand::before {
+  content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--verm); margin-right: 10px; vertical-align: 0;
+}
+.sitenav .navlinks { display: flex; gap: 22px; flex-wrap: wrap; }
+.sitenav .navlinks a {
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--f-mute); text-decoration: none; padding: 3px 0; position: relative;
+  transition: color .18s;
+}
+.sitenav .navlinks a:hover { color: var(--f-ink); }
+.sitenav .navlinks a[aria-current="page"] { color: var(--verm); }
+.sitenav .navlinks a[aria-current="page"]::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -3px; height: 2px; background: var(--verm);
+}
+.sitenav .navtag {
+  margin-left: auto; font-size: 10px; letter-spacing: 0.14em; color: var(--f-mute);
+  border: 1px solid var(--f-lineh); border-radius: 100px; padding: 6px 14px; background: var(--f-paper2);
+}
+@media (max-width: 680px) { .sitenav .navtag { display: none; } }
+
+/* ---------- HUD corners ---------- */
+.hud { position: fixed; inset: 0; z-index: 30; pointer-events: none; font-family: var(--mono); }
+.hud > div { position: fixed; font-size: 10px; letter-spacing: 0.22em; color: var(--f-mute); text-transform: uppercase; }
+.hud .cap { display: block; font-size: 9px; color: var(--f-mute); margin-bottom: 3px; }
+.hud .val { display: block; font-size: 11px; color: var(--f-ink); letter-spacing: 0.18em; }
+.hud .tl { top: 76px; left: clamp(18px, 4vw, 40px); }
+.hud .tr { top: 76px; right: clamp(18px, 4vw, 40px); text-align: right; }
+.hud .bl { bottom: 22px; left: clamp(18px, 4vw, 40px); }
+.hud .br { bottom: 22px; right: clamp(18px, 4vw, 40px); text-align: right; }
+.hud .kick { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--verm); margin-right: 8px; animation: kick 2.4s infinite; }
+@keyframes kick { 50% { opacity: .25; } }
+@media (max-width: 860px) { .hud { display: none; } } /* phones walk uncluttered */
+
+/* ---------- rooms (the walk) ---------- */
+main.walk { position: relative; z-index: 10; }
+.room {
+  min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+  max-width: 1240px; margin: 0 auto; padding: 90px clamp(18px, 4vw, 40px);
+  position: relative;
+}
+.room .idx {
+  position: absolute; top: 40px; left: clamp(18px, 4vw, 40px);
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.3em; color: var(--verm);
+}
+.reveal { opacity: 0; transform: translateY(34px); transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+.kicker {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--f-ink-soft); display: flex; align-items: center; gap: 10px; margin-bottom: 26px;
+}
+.kicker::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--verm); }
+.kicker em { font-style: normal; color: var(--verm); }
+
+h1.display, h2.display {
+  font-family: var(--display); font-weight: 800; letter-spacing: -0.015em;
+  color: var(--f-ink); line-height: 0.98; margin: 0;
+  font-variation-settings: "opsz" 144;
+}
+h1.display { font-size: clamp(52px, 9.6vw, 132px); }
+h2.display { font-size: clamp(36px, 5.6vw, 72px); }
+.display .verm { font-style: italic; font-weight: 600; color: var(--verm); }
+
+.lede {
+  color: var(--f-ink-soft); max-width: var(--f-measure); font-size: clamp(15.5px, 1.7vw, 17.5px);
+  margin-top: 30px; font-weight: 400;
+}
+.lede.quiet { color: var(--f-mute); font-size: 14px; }
+
+.hint { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; color: var(--f-mute); text-transform: uppercase; }
+
+/* hero */
+.room.hero { padding-top: 40px; }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 30px; align-items: center; }
+@media (max-width: 960px) { .hero-grid { grid-template-columns: 1fr; } .hero-glyphside { order: -1; min-height: 34vh; } }
+.hero-glyphside { position: relative; min-height: 58vh; }
+.glyph-meta {
+  position: absolute; font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em;
+  color: var(--f-mute); text-transform: uppercase;
+}
+.glyph-meta.a { left: 0; bottom: 0; }
+.glyph-meta.b { right: 0; bottom: 0; text-align: right; }
+.glyph-meta .big { display: block; font-size: 12px; color: var(--f-ink); margin-top: 3px; letter-spacing: 0.14em; }
+
+.castrow { display: flex; gap: 10px; align-items: center; margin-top: 34px; flex-wrap: wrap; }
+.castbtn {
+  width: 44px; height: 44px; border-radius: 10px; border: 1px solid var(--f-lineh);
+  background: var(--f-paper2); color: var(--f-ink); font-family: var(--display); font-size: 19px; font-weight: 700;
+  cursor: pointer; transition: all .18s;
+}
+.castbtn:hover { border-color: var(--f-ink); transform: translateY(-2px); }
+.castbtn.active { background: var(--verm); border-color: var(--verm); color: #fff; box-shadow: 0 8px 22px rgba(214,61,30,.3); }
+.autocast {
+  margin-left: 6px; font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em;
+  border: 1px solid var(--f-lineh); border-radius: 100px; background: var(--f-paper2);
+  color: var(--f-ink-soft); padding: 12px 18px; cursor: pointer; text-transform: uppercase;
+}
+.autocast::before { content: "●"; color: var(--verm); margin-right: 8px; }
+.autocast[aria-pressed="false"]::before { color: var(--f-mute); }
+
+/* plates — framed specimens */
+.plate {
+  background: var(--f-paper2); border: 1px solid var(--f-line);
+  box-shadow: 0 1px 0 var(--f-line), 0 24px 60px rgba(25, 22, 17, 0.07);
+  padding: clamp(22px, 3.6vw, 44px); position: relative;
+}
+.plate::after {
+  content: ""; position: absolute; inset: 8px; border: 1px solid var(--f-line);
+  pointer-events: none;
+}
+.plate .plate-cap {
+  position: absolute; top: -9px; left: 24px; background: var(--f-paper);
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.26em; color: var(--f-mute);
+  padding: 0 10px; text-transform: uppercase; z-index: 2;
+}
+
+/* specimen (live decode) */
+.specimen-text {
+  font-family: var(--display); font-weight: 500; font-size: clamp(21px, 3vw, 32px);
+  line-height: 1.7; color: var(--f-ink); min-height: 3.4em; letter-spacing: -0.005em;
+}
+.specimen-text mark {
+  background: linear-gradient(transparent 62%, var(--verm-wash) 62%);
+  color: inherit; padding: 0 2px; cursor: pointer; position: relative;
+  border-bottom: 2px solid var(--verm); white-space: nowrap;
+}
+.specimen-text mark:hover { background: var(--verm-wash); }
+.specimen-text .pin {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.18em; color: var(--verm);
+  vertical-align: super; margin-left: 4px; white-space: nowrap; text-transform: uppercase;
+}
+.specimen-foot { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; margin-top: 26px; }
+.recast {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+  background: var(--f-ink); color: var(--f-paper); border: none; border-radius: 8px;
+  padding: 13px 22px; cursor: pointer; transition: transform .18s, box-shadow .18s;
+}
+.recast:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(25,22,17,.22); }
+.readbar { flex: 1; min-width: 220px; display: grid; gap: 6px; }
+.readrow { display: grid; grid-template-columns: 130px 1fr 30px; gap: 10px; align-items: center; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.14em; color: var(--f-mute); text-transform: uppercase; }
+.readrow .bar { display: block; height: 4px; background: var(--f-paper3); border-radius: 100px; overflow: hidden; }
+.readrow .fill { display: block; height: 100%; width: 0; background: var(--verm); border-radius: 100px; transition: width .9s cubic-bezier(.22,1,.36,1); }
+.readrow .num { text-align: right; color: var(--f-ink-soft); }
+
+.popcard {
+  position: absolute; z-index: 50; width: min(360px, 86vw);
+  background: var(--f-ink); color: var(--f-paper); border-radius: 10px; padding: 18px 20px;
+  box-shadow: 0 24px 60px rgba(25,22,17,.35); font-family: var(--sans);
+}
+.popcard[hidden] { display: none; }
+.popcard .pc-tag { font-family: var(--mono); font-size: 9px; letter-spacing: .22em; color: #f0a08c; text-transform: uppercase; }
+.popcard h4 { font-family: var(--display); font-weight: 700; font-size: 19px; margin: 6px 0 8px; }
+.popcard p { font-size: 12.5px; color: #d9d4c9; margin: 0 0 8px; }
+.popcard .pc-src { font-family: var(--mono); font-size: 10px; color: #9a938a; }
+
+/* doors */
+.doorrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 18px; margin-top: 40px; }
+.doorplate {
+  display: block; text-decoration: none; color: inherit;
+  background: var(--f-paper2); border: 1px solid var(--f-line); position: relative;
+  padding: 28px 26px 24px; transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s, border-color .35s;
+  box-shadow: 0 1px 0 var(--f-line);
+}
+.doorplate::after { content: ""; position: absolute; inset: 8px; border: 1px solid var(--f-line); pointer-events: none; transition: inset .35s cubic-bezier(.22,1,.36,1); }
+.doorplate:hover { transform: translateY(-6px); box-shadow: 0 30px 60px rgba(25,22,17,.12); border-color: var(--f-lineh); }
+.doorplate:hover::after { inset: 5px; }
+.doorplate .dp-no { font-family: var(--mono); font-size: 10px; letter-spacing: .28em; color: var(--verm); }
+.doorplate h3 { font-family: var(--display); font-weight: 800; font-size: 27px; margin: 12px 0 8px; letter-spacing: -0.01em; }
+.doorplate h3 em { font-style: italic; font-weight: 600; color: var(--verm); }
+.doorplate p { font-size: 13px; color: var(--f-ink-soft); margin: 0 0 16px; }
+.doorplate .dp-specs { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
+.doorplate .dp-specs span {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; color: var(--f-mute);
+  border: 1px solid var(--f-lineh); border-radius: 100px; padding: 4px 10px; background: var(--f-paper);
+}
+.doorplate .dp-go { font-family: var(--mono); font-size: 10.5px; letter-spacing: .2em; color: var(--f-ink); text-transform: uppercase; }
+.doorplate .dp-go::after { content: " →"; color: var(--verm); }
+.doorplate.dark { background: var(--f-ink); border-color: var(--f-ink); color: var(--f-paper); }
+.doorplate.dark::after { border-color: #38332a; }
+.doorplate.dark p { color: #b9b3a6; }
+.doorplate.dark .dp-specs span { background: transparent; border-color: #454035; color: #9a938a; }
+.doorplate.dark .dp-go { color: var(--f-paper); }
+
+/* departing transition */
+body.depart main.walk { transition: opacity .4s, transform .45s cubic-bezier(.5,0,.9,.4); opacity: 0; transform: scale(1.05); }
+
+/* archive plate (audio demo) */
+.wavewrap { position: relative; margin-top: 8px; }
+canvas.inkwave { width: 100%; height: 130px; display: block; cursor: pointer; }
+.wavecap { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; flex-wrap: wrap; gap: 10px; }
+.playink {
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase;
+  background: var(--verm); color: #fff; border: none; border-radius: 8px; padding: 12px 20px; cursor: pointer;
+  transition: transform .18s, box-shadow .18s;
+}
+.playink:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(214,61,30,.3); }
+.wavemeta { font-family: var(--mono); font-size: 10px; letter-spacing: .16em; color: var(--f-mute); text-transform: uppercase; }
+
+/* method + footer */
+.method-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 30px 36px; margin-top: 40px; }
+.method-cols h4 { font-family: var(--display); font-weight: 700; font-size: 18px; margin: 0 0 8px; }
+.method-cols p { font-size: 13px; color: var(--f-ink-soft); margin: 0; }
+.rule { border: none; border-top: 1px solid var(--f-line); margin: 46px 0 0; }
+.sitefoot {
+  position: relative; z-index: 10; border-top: 1px solid var(--f-line);
+  max-width: 1240px; margin: 0 auto; padding: 30px clamp(18px, 4vw, 40px) 70px;
+  font-size: 12.5px; color: var(--f-mute); font-family: var(--sans);
+}
+.sitefoot p { max-width: var(--f-measure); margin: 0 0 9px; }
+.sitefoot a { color: var(--f-ink-soft); }
+.sitefoot .colophon { font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; margin-top: 16px; text-transform: uppercase; }
+
+/* ---------- upload widget (paper + dark hosts) ---------- */
+.uploadzone {
+  border: 1px dashed var(--f-lineh); border-radius: 10px; padding: 18px;
+  background: rgba(25,22,17,.02); margin-top: 12px; font-family: var(--sans);
+}
+.uploadzone.drag { border-color: var(--verm); background: var(--verm-wash); }
+.uploadzone .uz-head { font-family: var(--mono); font-size: 10px; letter-spacing: .22em; text-transform: uppercase; color: var(--f-mute); margin-bottom: 10px; }
+.uploadzone .uz-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.uploadzone button {
+  font-family: var(--sans); font-size: 12.5px; cursor: pointer; border-radius: 7px;
+  padding: 9px 16px; border: 1px solid var(--f-lineh); background: var(--f-paper2); color: var(--f-ink);
+  transition: border-color .18s, transform .15s;
+}
+.uploadzone button:hover { border-color: var(--verm); transform: translateY(-1px); }
+.uploadzone .uz-hint { font-size: 11.5px; color: var(--f-mute); margin-top: 10px; line-height: 1.6; }
+.uz-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; }
+.uz-item { display: flex; gap: 12px; align-items: center; border: 1px solid var(--f-line); border-radius: 8px; padding: 10px 12px; background: var(--f-paper2); }
+.uz-item .uz-name { font-size: 12.5px; word-break: break-all; color: var(--f-ink); }
+.uz-item .uz-meta { font-family: var(--mono); font-size: 10px; color: var(--f-mute); }
+.uz-item .uz-x { margin-left: auto; background: none; border: none; color: var(--f-mute); cursor: pointer; font-size: 16px; padding: 2px 6px; }
+.uz-item .uz-x:hover { color: var(--verm); }
+.uz-media { width: 100%; margin-top: 10px; border-radius: 8px; border: 1px solid var(--f-line); background: #000; display: block; }
+.uz-media[hidden] { display: none; }
+canvas.uz-wave { width: 100%; height: 72px; display: block; cursor: pointer; margin-top: 8px; }
+
+/* dark console hosts keep readable widgets */
+body:not(.foundry) .uploadzone { border-color: #3a4147; background: rgba(255,255,255,.02); }
+body:not(.foundry) .uploadzone button { background: #171b22; color: #e6e2d8; border-color: #3a4147; }
+body:not(.foundry) .uz-item { background: rgba(0,0,0,.25); border-color: #2a3037; }
+body:not(.foundry) .uz-item .uz-name { color: #e6e2d8; }
+
+/* ---------- motion safety ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { transition: opacity .2s; transform: none; }
+  .hud .kick { animation: none; }
+  * { scroll-behavior: auto !important; }
+}
+
+/* =============================================================
+   THE HALL OF DUST — the dark chamber, after the Eidolon study.
+   Tokens transplanted from its computed styles: hall #0b0a0c,
+   bone #efe7d6, amber #d79d4a, plaque rgba(18,15,12,.8),
+   rule rgba(215,154,74,.35), ease cubic-bezier(.22,1,.36,1).
+   ============================================================= */
+:root {
+  --hall: #0b0a0c; --hall-2: #131117;
+  --bone: #efe7d6; --bone-dim: #b8b0a3; --bone-faint: #6d675e;
+  --amber: #d79d4a; --amber-deep: #b47a2f;
+  --plaque-bg: rgba(18, 15, 12, 0.8);
+  --hall-rule: rgba(215, 154, 74, 0.35);
+}
+
+/* fixed backdrop that fades in as you walk into the hall */
+#hallbg {
+  position: fixed; inset: 0; z-index: 1; /* below #ink (2), above body */ pointer-events: none; opacity: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, rgba(215,157,74,.05), transparent 60%),
+    var(--hall);
+}
+#hallbg::after { /* vignette + grain, as in the reference */
+  content: ""; position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 100% 90% at 50% 50%, transparent 55%, rgba(0,0,0,.5) 100%);
+}
+
+.room.hall { color: var(--bone); }
+.room.hall .idx { color: var(--amber); }
+.room.hall .kicker { color: var(--bone-dim); }
+.room.hall .kicker::before { background: var(--amber); }
+.room.hall .display { color: var(--bone); }
+.room.hall .display .verm { color: var(--amber); }
+.room.hall .lede { color: var(--bone-dim); }
+.room.hall .hint { color: var(--bone-faint); }
+
+.plaque {
+  background: var(--plaque-bg); border: 1px solid rgba(215,154,74,.22);
+  border-left: 2px solid var(--amber);
+  backdrop-filter: none; /* deliberate — see dungeon perf study */
+  padding: clamp(22px, 3.2vw, 38px); max-width: 460px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.5);
+}
+.plaque .ex-no { font-family: var(--display); font-style: italic; font-weight: 500; font-size: 14px; color: var(--amber); }
+.plaque h3 { font-family: var(--display); font-weight: 600; font-size: clamp(26px, 3.4vw, 36px); color: var(--bone); margin: 8px 0 10px; letter-spacing: -0.01em; }
+.plaque .ex-caps { font-family: var(--mono); font-size: 9.5px; letter-spacing: .22em; color: var(--bone-faint); text-transform: uppercase; line-height: 2; margin-bottom: 14px; }
+.plaque hr { border: none; border-top: 1px solid var(--hall-rule); margin: 14px 0; }
+.plaque p { font-size: 13px; line-height: 1.75; color: var(--bone-dim); margin: 0 0 10px; }
+.plaque .ex-foot { font-family: var(--mono); font-size: 9.5px; letter-spacing: .2em; color: var(--amber-deep); text-transform: uppercase; }
+
+.hall-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 30px; align-items: center; min-height: 62vh; }
+@media (max-width: 960px) { .hall-grid { grid-template-columns: 1fr; } }
+.hall-stage { min-height: 46vh; position: relative; }
+.focus-hint {
+  position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%);
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .24em; color: var(--bone-faint);
+  text-transform: uppercase; white-space: nowrap;
+}
+#focusring {
+  position: fixed; z-index: 2; width: 120px; height: 120px; border-radius: 50%;
+  border: 1px solid var(--hall-rule); pointer-events: none; opacity: 0;
+  transform: translate(-50%, -50%) scale(.7); transition: opacity .3s, transform .5s cubic-bezier(.22,1,.36,1);
+}
+#focusring.on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+/* audio plate inside the hall */
+.room.hall .plate { background: var(--hall-2); border-color: rgba(215,154,74,.2); box-shadow: 0 30px 80px rgba(0,0,0,.45); }
+.room.hall .plate::after { border-color: rgba(215,154,74,.14); }
+.room.hall .plate .plate-cap { background: var(--hall); color: var(--bone-faint); }
+.room.hall .wavemeta { color: var(--bone-faint); }
+.room.hall .playink { background: var(--amber); color: #16100a; }
+.room.hall .playink:hover { box-shadow: 0 10px 24px rgba(215,157,74,.3); }
+
+/* HUD inverts while inside the hall */
+.hud.inverted > div, .hud.inverted .cap { color: var(--bone-faint); }
+.hud.inverted .val { color: var(--bone); }
+.hud.inverted .kick { background: var(--amber); }
+
+/* live region (screen-reader narration of the walk) */
+.walk-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  #focusring { display: none; }
+}
+
+/* =============================================================
+   MUSEUM MODE — the Eidolon treatment as the whole front page.
+   One token remap turns the paper foundry into the Hall of Dust:
+   every component above reads its colours from --f-* tokens, so
+   the museum needs no second component layer. Accent moves from
+   vermilion to Eidolon's amber.
+
+   `body.hall` rides the same remap. The three consoles carry that
+   class and use exactly one foundry component — the site nav — so
+   rather than restate the palette in hall.css and let two copies
+   drift, the remap simply answers to both names.
+   ============================================================= */
+body.museum,
+body.hall {
+  --f-paper:   #0b0a0c;
+  --f-paper2:  #131117;
+  --f-paper3:  #1b1820;
+  --f-ink:     #efe7d6;
+  --f-ink-soft:#b8b0a3;
+  --f-mute:    #6d675e;
+  --f-line:    rgba(215, 154, 74, 0.16);
+  --f-lineh:   rgba(215, 154, 74, 0.34);
+  --verm:      #d79d4a;
+  --verm-deep: #b47a2f;
+  --verm-wash: rgba(215, 157, 74, 0.10);
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 20%, rgba(215,157,74,.05), transparent 60%),
+    #0b0a0c;
+}
+body.museum::after { /* film grain + vignette, fixed, over everything visual */
+  content: ""; position: fixed; inset: 0; z-index: 3; pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.012) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 100% 92% at 50% 50%, transparent 58%, rgba(0,0,0,.45) 100%);
+}
+body.museum ::selection { background: var(--verm); color: #16100a; }
+body.museum ::-webkit-scrollbar { width: 9px; }
+body.museum ::-webkit-scrollbar-thumb { background: rgb(42,38,32); border: 2px solid rgb(6,5,6); border-radius: 9px; }
+body.museum ::-webkit-scrollbar-track { background: rgb(6,5,6); }
+body.museum #hallbg { display: none; } /* the whole page IS the hall now */
+body.museum .plate { box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+body.museum .plate .plate-cap { background: #0b0a0c; }
+body.museum .castbtn.active { color: #16100a; }
+body.museum .recast { background: var(--verm); color: #16100a; }
+body.museum .popcard { background: #efe7d6; color: #191611; }
+body.museum .popcard .pc-tag { color: #b47a2f; }
+body.museum .popcard p { color: #433d33; }
+body.museum .popcard .pc-src { color: #8a8377; }
+body.museum .doorplate.dark { background: var(--f-paper2); }
+body.museum .sitenav,
+body.hall .sitenav { background: rgba(11,10,12,.9); }
+body.museum .hud .val { color: var(--f-ink); }
+body.museum .exhibit-topcap {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .3em; color: var(--f-mute);
+  text-transform: uppercase; margin-left: auto; display: flex; gap: 18px; align-items: center;
+}
+.ex-italic { font-family: var(--display); font-style: italic; font-weight: 500; font-size: 15px; color: var(--verm); }
+
+/* vault status bar */
+.uz-vaultbar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px;
+  padding-top: 12px; border-top: 1px solid var(--f-line);
+  font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; color: var(--f-mute);
+  text-transform: uppercase;
+}
+.uz-vaultbar span { margin-right: auto; }
+.uz-vaultbar button { font-size: 10.5px; padding: 6px 12px; letter-spacing: .1em; }
+.uz-vaultbar button[data-act="wipe"]:hover { border-color: #c0392b; color: #c0392b; }
+
+</style>
+<style>
+/* =============================================================
+   hall.css — the Hall of Dust, applied site-wide.
+
+   The landing page reached this look through `body.museum` in
+   site.css. The three consoles arrived here from three different
+   palettes — O.B.L.I.V.I.O.N.'s blue-grey slab, Gaslight's
+   phosphor green, the Decoder's warm paper — and each of those
+   had its own token vocabulary. Rather than rename tokens across
+   three documents, each console's own `:root` block was retuned
+   to these values in place, so the files stay readable on their
+   own terms. This file carries only what is genuinely SHARED:
+   the palette of record, the type stack, and the chrome that
+   makes every page feel like one room — grain, vignette,
+   scrollbar, selection, and the dust layer.
+
+   Palette of record, lifted from the Eidolon study:
+     hall #0b0a0c   hall-2 #131117   hall-3 #1b1820
+     bone #efe7d6   bone-dim #b8b0a3  bone-faint #6d675e
+     amber #d79d4a  amber-deep #b47a2f
+     plaque rgba(18,15,12,.8)  rule rgba(215,154,74,.35)
+     ease cubic-bezier(.22,1,.36,1)
+   ============================================================= */
+
+:root {
+  --h-hall:       #0b0a0c;
+  --h-hall-2:     #131117;
+  --h-hall-3:     #1b1820;
+  --h-bone:       #efe7d6;
+  --h-bone-dim:   #b8b0a3;
+  --h-bone-faint: #6d675e;
+  --h-amber:      #d79d4a;
+  --h-amber-deep: #b47a2f;
+  --h-amber-lit:  #e8bd7f;
+  --h-rust:       #c9552e;   /* the one alarm hue; sienna, not fire-engine */
+  --h-ash:        #9c8e77;   /* secondary marker where a third hue is needed */
+  --h-on-amber:   #16100a;   /* text that sits ON amber */
+  --h-plaque:     rgba(18, 15, 12, 0.8);
+  --h-rule:       rgba(215, 154, 74, 0.35);
+  --h-rule-soft:  rgba(215, 154, 74, 0.18);
+  --h-wash:       rgba(215, 157, 74, 0.06);
+  --h-ease:       cubic-bezier(.22, 1, .36, 1);
+
+  --h-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --h-sans:    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --h-mono:    "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* -------------------------------------------------------------
+   The room itself. A single warm bloom high on the wall over
+   near-black, exactly as the reference stages it.
+   ------------------------------------------------------------- */
+body.hall {
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 18%, rgba(215, 157, 74, .05), transparent 60%),
+    var(--h-hall);
+  background-attachment: fixed;
+  color: var(--h-bone);
+}
+
+/* Film grain + vignette over everything. Fixed, non-interactive,
+   and deliberately NOT a backdrop-filter — see the dungeon perf
+   study: live blur over an animating canvas cost 48fps. */
+body.hall::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, .012) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 100% 92% at 50% 50%, transparent 58%, rgba(0, 0, 0, .45) 100%);
+}
+
+body.hall ::selection { background: var(--h-amber); color: var(--h-on-amber); }
+
+body.hall ::-webkit-scrollbar { width: 9px; height: 9px; }
+body.hall ::-webkit-scrollbar-track { background: rgb(6, 5, 6); }
+body.hall ::-webkit-scrollbar-thumb {
+  background: rgb(42, 38, 32);
+  border: 2px solid rgb(6, 5, 6);
+  border-radius: 9px;
+}
+body.hall ::-webkit-scrollbar-thumb:hover { background: rgb(66, 57, 44); }
+body.hall { scrollbar-color: rgb(42, 38, 32) rgb(6, 5, 6); scrollbar-width: thin; }
+
+/* -------------------------------------------------------------
+   The dust layer (assets/js/dust.js draws into this).
+   z-index 0 puts it behind page content but above the ground.
+   Every console sets its own content stacking above 0.
+   ------------------------------------------------------------- */
+#dust {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+/* Shared display type, opt-in per element. Deliberately NOT a blanket
+   `body.hall h2` rule: both consoles use small tracked-out monospace for
+   section labels, and a blanket serif silently swallowed them. */
+body.hall .hall-display {
+  font-family: var(--h-display);
+  letter-spacing: -0.015em;
+}
+
+/* A caption style used across pages for the small caps runs. */
+body.hall .hall-cap {
+  font-family: var(--h-mono);
+  font-size: 9.5px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--h-bone-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #dust { display: none; }
+}
+
+</style>
 <style>
 /* =============================================================
    Deception Decoder — visual system
@@ -301,62 +886,74 @@ footer.foot .disclaimer { color: var(--paper-faint); font-size: 12.5px; }
 }
 
 /* =============================================================
-   PAPER RE-THEME — the Decoder joins the foundry system.
-   Token override only: the component layer above stays untouched,
-   which is the point of having tokens. Severity hues re-picked
-   for AA contrast on bone.
+   HALL RE-THEME — the Decoder joins the Hall of Dust.
+
+   This block replaces the earlier paper re-theme. Same mechanism,
+   different destination: token override only, so the whole
+   component layer above stays untouched. That is the entire point
+   of having tokens, and it is why moving the Decoder from warm
+   paper to the hall is forty lines rather than a rewrite.
+
+   Severity hues re-picked for the dark ground. The brief above
+   still holds — calm authority, no klaxons — so severity climbs
+   through ash, amber, sienna rather than toward fire-engine red.
    ============================================================= */
 :root {
-  --ink:        #f3f0e8;   /* page ground (was near-black) */
-  --ink-2:      #faf8f2;   /* panels */
-  --ink-3:      #ebe6d9;   /* insets */
-  --line:       #d5cdba;
-  --line-soft:  #e2dccc;
-  --paper:      #191611;   /* primary text (was bone) */
-  --paper-dim:  #4a443a;
-  --paper-faint:#8a8377;
+  --ink:        #0b0a0c;   /* page ground — the hall */
+  --ink-2:      #131117;   /* panels */
+  --ink-3:      #1b1820;   /* insets */
+  --line:       rgba(215, 154, 74, 0.18);
+  --line-soft:  rgba(215, 154, 74, 0.10);
+  --paper:      #efe7d6;   /* primary text — bone */
+  --paper-dim:  #b8b0a3;
+  --paper-faint:#6d675e;
 
-  --accent:     #d63d1e;   /* vermilion replaces teal */
-  --accent-ink: #ffffff;
-  --sev-1:      #3d6ca8;
-  --sev-2:      #9a6a0a;
-  --sev-3:      #bb2c10;
-  --safe:       #7c5a10;
+  --accent:     #d79d4a;   /* the hall's amber replaces vermilion */
+  --accent-ink: #16100a;
+  --sev-1:      #9c8e77;   /* concerning — ash */
+  --sev-2:      #d79d4a;   /* serious — amber */
+  --sev-3:      #c9552e;   /* critical — sienna */
+  --safe:       #e8bd7f;
 
   --serif: "Fraunces", "Newsreader", Georgia, serif;
 }
 body {
   background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(214,61,30,.04) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 55% at 50% 18%, rgba(215, 157, 74, .05), transparent 60%),
     var(--ink);
+  background-attachment: fixed;
 }
-.mark { background: var(--accent); color: #fff; }
+/* page content rides above the dust layer (hall.css, z-index 0) */
+.sitenav, header.masthead, main.wrap, footer.foot { position: relative; z-index: 1; }
+
+.mark { background: var(--accent); color: var(--accent-ink); }
 .masthead .tag::before { background: var(--accent); }
-.hero .privacy { color: var(--accent); background: rgba(214,61,30,.07); border-color: rgba(214,61,30,.3); }
-textarea#input { background: var(--ink-2); box-shadow: inset 0 1px 3px rgba(25,22,17,.06); }
-textarea#input:focus { box-shadow: 0 0 0 4px rgba(214,61,30,.12); }
-button.primary:hover { background: #e5502f; box-shadow: 0 6px 22px rgba(214,61,30,.25); }
+.hero .privacy { color: var(--accent); background: rgba(215,157,74,.08); border-color: rgba(215,157,74,.32); }
+textarea#input { background: var(--ink-2); box-shadow: inset 0 1px 3px rgba(0,0,0,.35); }
+textarea#input:focus { box-shadow: 0 0 0 4px rgba(215,157,74,.16); }
+button.primary { color: var(--accent-ink); }
+button.primary:hover { background: #e8bd7f; box-shadow: 0 6px 22px rgba(215,157,74,.22); }
 .verdict { background: var(--ink-2); }
-.verdict[data-band="clear"] { --band: #2e7d5b; }
+.verdict[data-band="clear"] { --band: #7f9e6d; }
 .indices .fill { background: linear-gradient(90deg, var(--sev-1), var(--sev-2) 60%, var(--sev-3)); }
-.annotated mark[data-sev="1"] { background: rgba(61,108,168,.12); }
-.annotated mark[data-sev="2"] { background: rgba(154,106,10,.12); }
-.annotated mark[data-sev="3"] { background: rgba(187,44,16,.10); }
-.safety { border-color: rgba(124,90,16,.45); background: rgba(154,106,10,.07); }
-.safety p, .safety ul { color: #55431a; }
-.safety h3, .safety a { color: #7c5a10; }
-.drawer { background: var(--ink-2); box-shadow: -30px 0 80px rgba(25,22,17,.18); }
+.annotated mark[data-sev="1"] { background: rgba(156,142,119,.16); }
+.annotated mark[data-sev="2"] { background: rgba(215,157,74,.16); }
+.annotated mark[data-sev="3"] { background: rgba(201,85,46,.18); }
+.safety { border-color: rgba(215,157,74,.4); background: rgba(215,157,74,.07); }
+.safety p, .safety ul { color: var(--paper-dim); }
+.safety h3, .safety a { color: var(--safe); }
+.drawer { background: var(--ink-2); box-shadow: -30px 0 80px rgba(0,0,0,.55); }
 .drawer .note, .script { background: var(--ink-3); }
 .drawer p { color: var(--paper-dim); }
 .script .s, .script { color: var(--paper); }
-.scrim { background: rgba(25, 22, 17, 0.35); }
+.scrim { background: rgba(6, 5, 6, 0.6); }
 .finding { background: var(--ink-2); }
 footer.foot a { color: var(--paper-dim); }
 
 </style>
-<link rel="stylesheet" href="../assets/css/site.css">
 </head>
-<body>
+<body class="hall">
+<canvas id="dust" aria-hidden="true"></canvas>
 <nav class="sitenav">
   <a class="brand" href="../">THE BULLSHIT DECODER</a>
   <div class="navlinks">
@@ -2097,8 +2694,519 @@ document.addEventListener("DOMContentLoaded", () => {
     Nothing is sent to a server either way.
   </div>
 </noscript>
-<script src="../assets/js/vault.js"></script>
-<script src="../assets/js/upload.js"></script>
+<script>
+/**
+ * dust.js — the ambient dust of the hall, shared by every page.
+ *
+ * The landing page has a heavy particle engine: it rasterises glyphs and
+ * shapes off-screen, samples them, and flies thousands of grains between
+ * targets. That is the centrepiece and it earns its cost. The consoles are
+ * working surfaces — people read and type in them — so what they need is the
+ * *air* of the same room, not its choreography: slow motes catching a light
+ * source high on the wall, drifting, with a faint parallax as the pointer
+ * moves.
+ *
+ * Cost control, in order of how much each one bought:
+ *   - Density scales with viewport area and hard-caps at 220 motes.
+ *   - DPR is capped at 1.5. Beyond that the motes are sub-pixel anyway.
+ *   - Motes are batched into a handful of alpha buckets and drawn as arcs on
+ *     one path per bucket, so the fill/globalAlpha churn is O(buckets), not
+ *     O(motes).
+ *   - The loop parks itself when the tab is hidden.
+ *   - prefers-reduced-motion draws one static field and stops. The room still
+ *     has dust in it; the dust just doesn't move.
+ *
+ * Usage: include after hall.css. It mounts itself into #dust, creating that
+ * canvas if the page hasn't already declared one.
+ */
+
+(function (root) {
+  "use strict";
+
+  var MAX_MOTES = 220;
+  var DENSITY = 1 / 11000;   // motes per CSS pixel of viewport area
+  var reduce = root.matchMedia && root.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function mount() {
+    var cv = document.getElementById("dust");
+    if (!cv) {
+      cv = document.createElement("canvas");
+      cv.id = "dust";
+      cv.setAttribute("aria-hidden", "true");
+      document.body.insertBefore(cv, document.body.firstChild);
+    }
+    var ctx = cv.getContext("2d", { alpha: true });
+    if (!ctx) return;
+
+    var W = 0, H = 0, dpr = 1;
+    var motes = [];
+    var px = 0.5, py = 0.35;      // pointer, normalised — drives parallax
+    var tx = 0.5, ty = 0.35;      // eased target
+    var raf = 0, last = 0;
+
+    function seed() {
+      var want = Math.min(MAX_MOTES, Math.round(W * H * DENSITY));
+      motes.length = 0;
+      for (var i = 0; i < want; i++) {
+        // depth 0 = far (small, dim, slow), 1 = near (bigger, brighter, faster)
+        var depth = Math.pow(Math.random(), 1.6);
+        motes.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: 0.4 + depth * 1.5,
+          a: 0.05 + depth * 0.28,
+          vx: (Math.random() - 0.5) * (4 + depth * 10),
+          vy: -(2 + depth * 9) - Math.random() * 4,   // dust rises through the beam
+          drift: Math.random() * Math.PI * 2,
+          dspd: 0.15 + Math.random() * 0.4,
+          depth: depth
+        });
+      }
+    }
+
+    function resize() {
+      dpr = Math.min(root.devicePixelRatio || 1, 1.5);
+      W = root.innerWidth;
+      H = root.innerHeight;
+      cv.width = Math.round(W * dpr);
+      cv.height = Math.round(H * dpr);
+      cv.style.width = W + "px";
+      cv.style.height = H + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      seed();
+      if (reduce) draw(0);
+    }
+
+    /* Alpha buckets: every mote lands in one of six, and each bucket is a
+       single path. Six fills per frame instead of two hundred. */
+    var BUCKETS = 6;
+
+    function draw(shiftX, shiftY) {
+      shiftX = shiftX || 0;
+      shiftY = shiftY || 0;
+      ctx.clearRect(0, 0, W, H);
+
+      for (var b = 0; b < BUCKETS; b++) {
+        var lo = b / BUCKETS, hi = (b + 1) / BUCKETS;
+        var any = false;
+        ctx.beginPath();
+        for (var i = 0; i < motes.length; i++) {
+          var m = motes[i];
+          var norm = m.a / 0.33;
+          if (norm < lo || norm >= hi) continue;
+          var wob = Math.sin(m.drift) * 6 * m.depth;
+          var x = m.x + wob + shiftX * (0.3 + m.depth * 1.4) * 26;
+          var y = m.y + shiftY * (0.3 + m.depth * 1.4) * 18;
+          ctx.moveTo(x + m.r, y);
+          ctx.arc(x, y, m.r, 0, Math.PI * 2);
+          any = true;
+        }
+        if (!any) continue;
+        // Motes closer to the light read amber; the far field stays bone.
+        var warm = (lo + hi) / 2;
+        ctx.fillStyle = warm > 0.55
+          ? "rgba(215, 157, 74, " + ((lo + hi) / 2 * 0.33).toFixed(3) + ")"
+          : "rgba(239, 231, 214, " + ((lo + hi) / 2 * 0.22).toFixed(3) + ")";
+        ctx.fill();
+      }
+    }
+
+    function step(now) {
+      raf = requestAnimationFrame(step);
+      var dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
+
+      tx += (px - tx) * 0.045;
+      ty += (py - ty) * 0.045;
+
+      for (var i = 0; i < motes.length; i++) {
+        var m = motes[i];
+        m.x += m.vx * dt;
+        m.y += m.vy * dt;
+        m.drift += m.dspd * dt;
+        if (m.y < -8) { m.y = H + 8; m.x = Math.random() * W; }
+        if (m.x < -12) m.x = W + 12;
+        else if (m.x > W + 12) m.x = -12;
+      }
+      draw(tx - 0.5, ty - 0.5);
+    }
+
+    function start() {
+      if (reduce || raf) return;
+      last = performance.now();
+      raf = requestAnimationFrame(step);
+    }
+    function stop() {
+      if (!raf) return;
+      cancelAnimationFrame(raf);
+      raf = 0;
+    }
+
+    root.addEventListener("resize", resize, { passive: true });
+    root.addEventListener("pointermove", function (e) {
+      px = e.clientX / root.innerWidth;
+      py = e.clientY / root.innerHeight;
+    }, { passive: true });
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) stop(); else start();
+    });
+
+    resize();
+    start();
+
+    root.Dust = { stop: stop, start: start, count: function () { return motes.length; } };
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", mount);
+  } else {
+    mount();
+  }
+})(window);
+
+</script>
+<script>
+/**
+ * vault.js — persistent local storage for uploaded materials.
+ *
+ * WHY THIS IS NOT A SERVER
+ * ------------------------
+ * The obvious reading of "a backend for materials" is a server that receives
+ * uploads. For this project that would be the wrong build, and not because it is
+ * hard: the materials people bring here are recordings and transcripts of their
+ * own private lives, often naming other people. The moment those bytes leave the
+ * device they become someone's liability — a breach, a subpoena, a hosting
+ * provider's scanner, an admin with database access. The site's whole claim is
+ * that this cannot happen because it structurally cannot happen.
+ *
+ * So the vault is a real persistence layer with real backend semantics — durable
+ * storage, an object store, indexes, quota management, CRUD, export — that lives
+ * entirely inside the visitor's browser via IndexedDB. Files survive reloads,
+ * restarts, and days away. They never transit a network. Clearing them is one
+ * button, and uninstalling is closing the tab and clicking "clear".
+ *
+ * If a hosted, multi-device archive is ever genuinely needed, the honest version
+ * is a private, authenticated, encrypted-at-rest service that is nobody's public
+ * website — see README, "If you really need a server".
+ *
+ * Public API (window.Vault):
+ *   await Vault.ready()                  → open/upgrade the database
+ *   await Vault.put(file, meta)          → store a File/Blob, returns record
+ *   await Vault.all()                    → all records, newest first (no blobs)
+ *   await Vault.get(id)                  → one record including its blob
+ *   await Vault.remove(id)               → delete one
+ *   await Vault.clear()                  → delete everything
+ *   await Vault.usage()                  → { used, quota } in bytes
+ *   Vault.objectURL(record)              → a blob: URL (caller revokes)
+ */
+
+(function (root) {
+  "use strict";
+
+  const DB_NAME = "bsd-vault";
+  const DB_VERSION = 1;
+  const STORE = "materials";
+  let dbp = null;
+
+  function ready() {
+    if (dbp) return dbp;
+    dbp = new Promise((resolve, reject) => {
+      if (!("indexedDB" in root)) return reject(new Error("IndexedDB unavailable"));
+      const req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = e => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE)) {
+          const os = db.createObjectStore(STORE, { keyPath: "id", autoIncrement: true });
+          os.createIndex("addedAt", "addedAt");
+          os.createIndex("kind", "kind");
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    return dbp;
+  }
+
+  function tx(mode, fn) {
+    return ready().then(db => new Promise((resolve, reject) => {
+      const t = db.transaction(STORE, mode);
+      const store = t.objectStore(STORE);
+      let out;
+      try { out = fn(store); } catch (e) { reject(e); return; }
+      t.oncomplete = () => resolve(out && out.result !== undefined ? out.result : out);
+      t.onerror = () => reject(t.error);
+      t.onabort = () => reject(t.error || new Error("transaction aborted"));
+    }));
+  }
+
+  const kindOf = file =>
+    /^audio\//.test(file.type) ? "audio"
+    : /^video\//.test(file.type) ? "video"
+    : /^image\//.test(file.type) ? "image"
+    : /^text\/|\.(txt|md|csv|json|srt|vtt|log)$/i.test(file.type + file.name) ? "text"
+    : "other";
+
+  async function put(file, meta) {
+    const rec = {
+      name: file.name || "untitled",
+      type: file.type || "application/octet-stream",
+      size: file.size,
+      kind: kindOf(file),
+      addedAt: Date.now(),
+      note: (meta && meta.note) || "",
+      text: (meta && meta.text) || "",   // extracted transcript, if any
+      blob: file,
+    };
+    const id = await tx("readwrite", store => store.add(rec));
+    return Object.assign({ id }, rec);
+  }
+
+  /** Records without blobs — cheap to list. */
+  function all() {
+    return tx("readonly", store => {
+      const out = [];
+      store.openCursor(null, "prev").onsuccess = e => {
+        const c = e.target.result;
+        if (!c) return;
+        const { blob, ...rest } = c.value;
+        out.push(rest);
+        c.continue();
+      };
+      return { get result() { return out; } };
+    });
+  }
+
+  const get = id => tx("readonly", store => store.get(id));
+  const remove = id => tx("readwrite", store => store.delete(id));
+  const clear = () => tx("readwrite", store => store.clear());
+
+  async function usage() {
+    if (navigator.storage && navigator.storage.estimate) {
+      const { usage: used = 0, quota = 0 } = await navigator.storage.estimate();
+      return { used, quota };
+    }
+    return { used: 0, quota: 0 };
+  }
+
+  const objectURL = rec => URL.createObjectURL(rec.blob);
+
+  /** Manifest of what's held — metadata only, never the bytes. */
+  async function manifest() {
+    const recs = await all();
+    return {
+      generated: new Date().toISOString(),
+      note: "Metadata only. Media never left the browser that produced this file.",
+      count: recs.length,
+      items: recs.map(r => ({
+        name: r.name, kind: r.kind, type: r.type, size: r.size,
+        added: new Date(r.addedAt).toISOString(), note: r.note,
+        words: r.text ? r.text.split(/\s+/).length : 0,
+      })),
+    };
+  }
+
+  root.Vault = { ready, put, all, get, remove, clear, usage, objectURL, manifest, kindOf };
+})(window);
+
+</script>
+<script>
+/**
+ * upload.js — materials intake, shared by every console.
+ *
+ * NOTHING IS UPLOADED. There is no server on this site. "Upload" here means
+ * "open on your own machine": files are read through FileReader/Blob APIs inside
+ * your tab, and — when the vault is available (assets/js/vault.js) — persisted to
+ * this browser's own IndexedDB so they survive reloads and are restored on your
+ * next visit. They never transit a network. Erasing them is one button.
+ *
+ * Text-bearing files (.txt .md .csv .json .srt .vtt .log) are read and handed to
+ * the analyzer, with subtitle timing stripped so transcripts read as prose.
+ * Audio, video, and images attach a local player or preview.
+ *
+ * Usage:
+ *   mountUploader(el, { label, accept, persist = true, onText(text, file, li) })
+ */
+
+(function (root) {
+  "use strict";
+
+  const TEXTY = /\.(txt|md|markdown|csv|tsv|json|log|srt|vtt|rtf|eml)$/i;
+  const MEDIA = /^(audio|video|image)\//;
+
+  const fmt = b =>
+    b < 1024 ? b + " B" :
+    b < 1048576 ? (b / 1024).toFixed(0) + " KB" :
+    (b / 1048576).toFixed(1) + " MB";
+
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+  /** Strip cue numbers and timecodes so a subtitle file analyses as prose. */
+  const cleanSubtitles = t => t
+    .replace(/^\d+\s*$/gm, "")
+    .replace(/^\d{2}:\d{2}:\d{2}[.,]\d{3}\s*-->.*$/gm, "")
+    .replace(/^WEBVTT.*$/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  function mountUploader(host, opts) {
+    opts = opts || {};
+    const accept = opts.accept || ".txt,.md,.csv,.json,.srt,.vtt,.log,audio/*,video/*,image/*";
+    const vaultOn = opts.persist !== false && typeof root.Vault !== "undefined";
+
+    host.classList.add("uploadzone");
+    host.innerHTML = `
+      <div class="uz-head">${esc(opts.label || "Add your own materials")}</div>
+      <div class="uz-actions">
+        <button type="button" data-act="pick">Choose files</button>
+        <button type="button" data-act="media">Add audio or video</button>
+      </div>
+      <input type="file" hidden multiple accept="${accept}" data-role="file">
+      <input type="file" hidden multiple accept="audio/*,video/*" data-role="mediapick">
+      <p class="uz-hint" data-role="hint"></p>
+      <div class="uz-vaultbar" data-role="vaultbar" hidden>
+        <span data-role="vaultstat"></span>
+        <button type="button" data-act="manifest">Export manifest</button>
+        <button type="button" data-act="wipe">Erase vault</button>
+      </div>
+      <ul class="uz-list" data-role="list"></ul>`;
+
+    const $r = sel => host.querySelector(`[data-role="${sel}"]`);
+    const $a = sel => host.querySelector(`[data-act="${sel}"]`);
+    const list = $r("list"), vaultbar = $r("vaultbar"), vaultstat = $r("vaultstat");
+
+    $r("hint").innerHTML = vaultOn
+      ? "Or drag them here. <b>Nothing is uploaded.</b> Materials are held in this browser's own vault — " +
+        "they survive reloads, never touch a network, and erasing them is one button."
+      : "Or drag them here. <b>Nothing is uploaded.</b> Files open locally in this tab and are discarded " +
+        "when you close it.";
+
+    /* ---------- vault status ---------- */
+    async function refreshBar() {
+      if (!vaultOn) return;
+      try {
+        const recs = await Vault.all();
+        const { used, quota } = await Vault.usage();
+        vaultbar.hidden = recs.length === 0;
+        vaultstat.textContent = recs.length
+          ? `${recs.length} item${recs.length === 1 ? "" : "s"} held locally · ${fmt(used)}` +
+            (quota ? ` of ${fmt(quota)} available` : "")
+          : "";
+      } catch (e) { vaultbar.hidden = true; }
+    }
+
+    /* ---------- one row per material ---------- */
+    function attach(file, rec, restored) {
+      const li = document.createElement("li");
+      li.className = "uz-item";
+      const kind = rec ? rec.kind : (root.Vault ? Vault.kindOf(file) : "other");
+      const extra = restored ? "from vault" : kind === "text" ? "read into analysis" : "playing locally";
+      li.innerHTML = `
+        <div>
+          <div class="uz-name">${esc(file.name || rec.name)}</div>
+          <div class="uz-meta">${fmt(file.size)} · ${esc(file.type || "unknown")} · ${extra}</div>
+        </div>
+        <button class="uz-x" type="button" aria-label="Remove this material">×</button>`;
+      list.appendChild(li);
+
+      let mediaLi = null;
+      if (MEDIA.test(file.type)) {
+        mediaLi = document.createElement("li");
+        mediaLi.className = "uz-item";
+        mediaLi.style.display = "block";
+        const tag = file.type.startsWith("video") ? "video" : file.type.startsWith("audio") ? "audio" : "img";
+        const el = document.createElement(tag);
+        el.className = "uz-media";
+        el.src = URL.createObjectURL(file);
+        if (tag === "img") el.alt = file.name || "";
+        else { el.controls = true; el.preload = "metadata"; }
+        mediaLi.appendChild(el);
+        list.appendChild(mediaLi);
+      }
+
+      li.querySelector(".uz-x").onclick = async () => {
+        const m = mediaLi && mediaLi.querySelector("audio,video,img");
+        if (m && m.src.startsWith("blob:")) URL.revokeObjectURL(m.src);
+        if (mediaLi) mediaLi.remove();
+        li.remove();
+        if (vaultOn && rec && rec.id != null) { await Vault.remove(rec.id); refreshBar(); }
+      };
+      return li;
+    }
+
+    /* ---------- intake ---------- */
+    function handle(files) {
+      [...files].forEach(file => {
+        const isText = TEXTY.test(file.name) || /^text\//.test(file.type);
+        if (isText) {
+          const r = new FileReader();
+          r.onload = async () => {
+            let text = String(r.result || "");
+            if (/\.(srt|vtt)$/i.test(file.name)) text = cleanSubtitles(text);
+            let rec = null;
+            if (vaultOn) { try { rec = await Vault.put(file, { text }); refreshBar(); } catch (e) {} }
+            const li = attach(file, rec, false);
+            if (typeof opts.onText === "function") opts.onText(text, file, li);
+          };
+          r.readAsText(file);
+          return;
+        }
+        (async () => {
+          let rec = null;
+          if (vaultOn) { try { rec = await Vault.put(file, {}); refreshBar(); } catch (e) {} }
+          attach(file, rec, false);
+        })();
+      });
+    }
+
+    /* ---------- controls ---------- */
+    $a("pick").onclick = () => $r("file").click();
+    $a("media").onclick = () => $r("mediapick").click();
+    $r("file").onchange = e => handle(e.target.files);
+    $r("mediapick").onchange = e => handle(e.target.files);
+
+    ["dragenter", "dragover"].forEach(ev =>
+      host.addEventListener(ev, e => { e.preventDefault(); host.classList.add("drag"); }));
+    ["dragleave", "drop"].forEach(ev =>
+      host.addEventListener(ev, e => { e.preventDefault(); host.classList.remove("drag"); }));
+    host.addEventListener("drop", e => handle(e.dataTransfer.files));
+
+    if (vaultOn) {
+      $a("wipe").onclick = async () => {
+        if (!confirm("Erase every material stored in this browser? This cannot be undone.")) return;
+        await Vault.clear();
+        list.innerHTML = "";
+        refreshBar();
+      };
+      $a("manifest").onclick = async () => {
+        const blob = new Blob([JSON.stringify(await Vault.manifest(), null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "vault-manifest.json";
+        a.click();
+        URL.revokeObjectURL(a.href);
+      };
+    }
+
+    /* ---------- restore previous session ---------- */
+    (async function restore() {
+      if (!vaultOn) return;
+      try {
+        const metas = await Vault.all();
+        for (const meta of metas.slice().reverse()) {
+          const rec = await Vault.get(meta.id);
+          if (rec && rec.blob) attach(rec.blob, rec, true);
+        }
+        refreshBar();
+      } catch (e) { /* private browsing or storage denied — intake still works */ }
+    })();
+
+    return { refresh: refreshBar };
+  }
+
+  root.mountUploader = mountUploader;
+})(window);
+
+</script>
 <script>
 /* Load a transcript, message export, or note straight into the analyser.
    Media files attach a local player — useful when the recording is the record. */

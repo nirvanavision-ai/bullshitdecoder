@@ -1,0 +1,118 @@
+/* =============================================================
+   hall.css — the Hall of Dust, applied site-wide.
+
+   The landing page reached this look through `body.museum` in
+   site.css. The three consoles arrived here from three different
+   palettes — O.B.L.I.V.I.O.N.'s blue-grey slab, Gaslight's
+   phosphor green, the Decoder's warm paper — and each of those
+   had its own token vocabulary. Rather than rename tokens across
+   three documents, each console's own `:root` block was retuned
+   to these values in place, so the files stay readable on their
+   own terms. This file carries only what is genuinely SHARED:
+   the palette of record, the type stack, and the chrome that
+   makes every page feel like one room — grain, vignette,
+   scrollbar, selection, and the dust layer.
+
+   Palette of record, lifted from the Eidolon study:
+     hall #0b0a0c   hall-2 #131117   hall-3 #1b1820
+     bone #efe7d6   bone-dim #b8b0a3  bone-faint #6d675e
+     amber #d79d4a  amber-deep #b47a2f
+     plaque rgba(18,15,12,.8)  rule rgba(215,154,74,.35)
+     ease cubic-bezier(.22,1,.36,1)
+   ============================================================= */
+
+:root {
+  --h-hall:       #0b0a0c;
+  --h-hall-2:     #131117;
+  --h-hall-3:     #1b1820;
+  --h-bone:       #efe7d6;
+  --h-bone-dim:   #b8b0a3;
+  --h-bone-faint: #6d675e;
+  --h-amber:      #d79d4a;
+  --h-amber-deep: #b47a2f;
+  --h-amber-lit:  #e8bd7f;
+  --h-rust:       #c9552e;   /* the one alarm hue; sienna, not fire-engine */
+  --h-ash:        #9c8e77;   /* secondary marker where a third hue is needed */
+  --h-on-amber:   #16100a;   /* text that sits ON amber */
+  --h-plaque:     rgba(18, 15, 12, 0.8);
+  --h-rule:       rgba(215, 154, 74, 0.35);
+  --h-rule-soft:  rgba(215, 154, 74, 0.18);
+  --h-wash:       rgba(215, 157, 74, 0.06);
+  --h-ease:       cubic-bezier(.22, 1, .36, 1);
+
+  --h-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --h-sans:    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --h-mono:    "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* -------------------------------------------------------------
+   The room itself. A single warm bloom high on the wall over
+   near-black, exactly as the reference stages it.
+   ------------------------------------------------------------- */
+body.hall {
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 18%, rgba(215, 157, 74, .05), transparent 60%),
+    var(--h-hall);
+  background-attachment: fixed;
+  color: var(--h-bone);
+}
+
+/* Film grain + vignette over everything. Fixed, non-interactive,
+   and deliberately NOT a backdrop-filter — see the dungeon perf
+   study: live blur over an animating canvas cost 48fps. */
+body.hall::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, .012) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse 100% 92% at 50% 50%, transparent 58%, rgba(0, 0, 0, .45) 100%);
+}
+
+body.hall ::selection { background: var(--h-amber); color: var(--h-on-amber); }
+
+body.hall ::-webkit-scrollbar { width: 9px; height: 9px; }
+body.hall ::-webkit-scrollbar-track { background: rgb(6, 5, 6); }
+body.hall ::-webkit-scrollbar-thumb {
+  background: rgb(42, 38, 32);
+  border: 2px solid rgb(6, 5, 6);
+  border-radius: 9px;
+}
+body.hall ::-webkit-scrollbar-thumb:hover { background: rgb(66, 57, 44); }
+body.hall { scrollbar-color: rgb(42, 38, 32) rgb(6, 5, 6); scrollbar-width: thin; }
+
+/* -------------------------------------------------------------
+   The dust layer (assets/js/dust.js draws into this).
+   z-index 0 puts it behind page content but above the ground.
+   Every console sets its own content stacking above 0.
+   ------------------------------------------------------------- */
+#dust {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: block;
+}
+
+/* Shared display type, opt-in per element. Deliberately NOT a blanket
+   `body.hall h2` rule: both consoles use small tracked-out monospace for
+   section labels, and a blanket serif silently swallowed them. */
+body.hall .hall-display {
+  font-family: var(--h-display);
+  letter-spacing: -0.015em;
+}
+
+/* A caption style used across pages for the small caps runs. */
+body.hall .hall-cap {
+  font-family: var(--h-mono);
+  font-size: 9.5px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--h-bone-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #dust { display: none; }
+}
